@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TKA English Quest - Mini Game 50 Soal SMA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f8fafc;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.78);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+    .option-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.15);
+    }
+    @keyframes pulse-fast {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .combo-badge {
+      animation: pulse-fast 1.2s infinite;
+    }
+    /* Custom scrollbar for reading passages */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="p-4 md:p-6 flex flex-col items-center justify-center">
+
+  <!-- MAIN CONTAINER -->
+  <div class="w-full max-w-4xl mx-auto">
+
+    <!-- HEADER BAR -->
+    <header class="flex flex-wrap items-center justify-between gap-4 mb-6 glass-card p-4 rounded-2xl shadow-lg">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-2xl shadow-md shadow-indigo-500/30">
+          🚀
+        </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-white">TKA English Quest</h1>
+          <p class="text-xs text-slate-400">50 Soal Komprehensif SMA (Kelas 10–12)</p>
+        </div>
+      </div>
+
+      <!-- HUD STATS (Shown in Game) -->
+      <div id="hud-stats" class="hidden flex items-center gap-3 md:gap-5">
+        <div class="flex items-center gap-1.5 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700" title="Nyawa (Mode Survival)">
+          <span id="lives-display" class="text-sm tracking-widest">❤️❤️❤️❤️❤️</span>
+        </div>
+        <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl">
+          <span class="text-amber-400 text-sm">🔥 Streak:</span>
+          <span id="streak-display" class="font-bold text-amber-300 text-sm">0</span>
+        </div>
+        <div class="flex items-center gap-1.5 bg-indigo-500/15 border border-indigo-500/30 px-3.5 py-1.5 rounded-xl">
+          <span class="text-indigo-300 text-sm">⭐ Skor:</span>
+          <span id="score-display" class="font-extrabold text-white text-sm">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- SCREEN 1: START MENU -->
+    <section id="start-screen" class="glass-card rounded-3xl p-6 md:p-10 text-center shadow-2xl">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-4">
+        ✨ EDISI PERSIAPAN TKA & UTBK SMA
+      </div>
+      <h2 class="text-2xl md:text-4xl font-extrabold text-white mb-3">Siap Taklukkan 50 Soal Bahasa Inggris?</h2>
+      <p class="text-slate-300 text-sm md:text-base max-w-xl mx-auto mb-8 leading-relaxed">
+        Uji penguasaan materi Kelas 10 hingga Kelas 12 mulai dari <span class="text-indigo-300 font-semibold">Grammar & Structure</span>, <span class="text-emerald-300 font-semibold">Functional Expressions</span>, hingga <span class="text-amber-300 font-semibold">Reading Comprehension</span>. Jawab berturut-turut dengan benar untuk menggandakan poin!
+      </p>
+
+      <!-- PILIH KATEGORI -->
+      <div class="max-w-2xl mx-auto mb-8 text-left">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">1. Pilih Misi Kategori Soal:</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="category-selector">
+          <button onclick="selectCategory('all')" data-cat="all" class="cat-btn active-cat p-4 rounded-2xl border-2 border-indigo-500 bg-indigo-600/20 text-left transition">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-white">🏆 Semua Soal (Full Marathon)</span>
+              <span class="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-md font-bold">50 Soal</span>
+            </div>
+            <p class="text-xs text-slate-300">Gabungan lengkap Grammar, Expressions, dan Reading TKA.</p>
+          </button>
+
+          <button onclick="selectCategory('grammar')" data-cat="grammar" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-white">⚡ Grammar & Structure</span>
+              <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 1–20</span>
+            </div>
+            <p class="text-xs text-slate-400">Tenses, Passive Voice, Conditional, Relative Clause, Causative.</p>
+          </button>
+
+          <button onclick="selectCategory('functional')" data-cat="functional" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-white">💬 Functional & Short Text</span>
+              <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 21–26</span>
+            </div>
+            <p class="text-xs text-slate-400">Dialog ungkapan, Announcement, dan Application Letter.</p>
+          </button>
+
+          <button onclick="selectCategory('reading')" data-cat="reading" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-white">📖 Reading & Genre Teks</span>
+              <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 27–50</span>
+            </div>
+            <p class="text-xs text-slate-400">7 Teks Lengkap: Descriptive, Recount, Narrative, Exposition, dll.</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- PILIH MODE GAME -->
+      <div class="max-w-2xl mx-auto mb-8 text-left">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">2. Pilih Mode Permainan:</label>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button onclick="selectMode('zen')" data-mode="zen" class="mode-btn active-mode p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-600/20 text-left transition">
+            <div class="font-bold text-white text-sm mb-0.5">🌱 Mode Belajar (Zen)</div>
+            <p class="text-xs text-slate-300">Nyawa tak terbatas (♾️). Fokus latihan & baca pembahasan.</p>
+          </button>
+          <button onclick="selectMode('survival')" data-mode="survival" class="mode-btn p-3.5 rounded-xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+            <div class="font-bold text-white text-sm mb-0.5">❤️ Mode Survival</div>
+            <p class="text-xs text-slate-400">Dibekali 5 Nyawa. Salah 5 kali permainan berakhir!</p>
+          </button>
+          <button onclick="selectMode('shuffle')" data-mode="shuffle" class="mode-btn p-3.5 rounded-xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+            <div class="font-bold text-white text-sm mb-0.5">🎲 Mode Acak (Shuffle)</div>
+            <p class="text-xs text-slate-400">Urutan soal diacak supaya tidak sekadar hafal nomor.</p>
+          </button>
+        </div>
+      </div>
+
+      <button onclick="startGame()" class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-base shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5">
+        Mulai Permainan Sekarang 🚀
+      </button>
+    </section>
+
+    <!-- SCREEN 2: QUIZ GAMEPLAY -->
+    <section id="quiz-screen" class="hidden">
+      <!-- Progress Bar & Navigation Info -->
+      <div class="mb-4">
+        <div class="flex items-center justify-between text-xs text-slate-300 mb-2">
+          <div class="flex items-center gap-2">
+            <span id="question-badge" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold">Soal 1 / 50</span>
+            <span id="category-badge" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium">Grammar</span>
+          </div>
+          <button onclick="confirmQuit()" class="text-slate-400 hover:text-rose-400 font-semibold transition">
+            ✕ Keluar ke Menu
+          </button>
+        </div>
+        <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full transition-all duration-300" style="width: 2%"></div>
+        </div>
+      </div>
+
+      <!-- Main Question Card -->
+      <div class="glass-card rounded-3xl p-5 md:p-8 shadow-2xl">
+        
+        <!-- Reading Passage Box (Only shown if question has a passage) -->
+        <div id="passage-container" class="hidden mb-6 bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 md:p-5 max-h-64 overflow-y-auto">
+          <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
+            <span id="passage-title" class="text-xs font-extrabold uppercase tracking-wider text-amber-400">📖 TEKS BACAAN</span>
+            <span class="text-[11px] text-slate-400">Gulir ke bawah jika teks panjang</span>
+          </div>
+          <div id="passage-content" class="text-sm text-slate-200 leading-relaxed space-y-2.5 font-normal"></div>
+        </div>
+
+        <!-- Question Text -->
+        <div class="mb-6">
+          <h3 id="question-text" class="text-base md:text-lg font-bold text-white leading-relaxed"></h3>
+        </div>
+
+        <!-- Options List -->
+        <div id="options-container" class="space-y-3 mb-6"></div>
+
+        <!-- Feedback & Explanation Box -->
+        <div id="feedback-box" class="hidden rounded-2xl p-4 md:p-5 mb-6 border transition-all">
+          <div class="flex items-start gap-3">
+            <div id="feedback-icon" class="text-2xl mt-0.5">✅</div>
+            <div class="flex-1">
+              <div id="feedback-title" class="font-extrabold text-sm md:text-base mb-1">Jawaban Benar!</div>
+              <p id="feedback-explanation" class="text-xs md:text-sm text-slate-200 leading-relaxed"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Action Buttons -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+          <button id="prev-btn" onclick="prevQuestion()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs md:text-sm font-semibold transition disabled:opacity-40 disabled:pointer-events-none">
+            ← Soal Sebelumnya
+          </button>
+
+          <button id="next-btn" onclick="nextQuestion()" class="hidden px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-bold shadow-lg shadow-indigo-600/30 transition">
+            Soal Berikutnya →
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SCREEN 3: RESULT & REVIEW -->
+    <section id="result-screen" class="hidden glass-card rounded-3xl p-6 md:p-10 text-center shadow-2xl">
+      <div id="result-emoji" class="text-6xl mb-3">🏆</div>
+      <h2 id="result-title" class="text-2xl md:text-3xl font-extrabold text-white mb-2">Misi Selesai!</h2>
+      <p id="result-subtitle" class="text-slate-300 text-sm mb-8">Berikut adalah evaluasi kemampuan Bahasa Inggris TKA kamu:</p>
+
+      <!-- Score Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto mb-8">
+        <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
+          <div class="text-xs text-slate-400 mb-1">Total Skor</div>
+          <div id="final-score" class="text-2xl font-extrabold text-indigo-400">0</div>
+        </div>
+        <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
+          <div class="text-xs text-slate-400 mb-1">Akurasi</div>
+          <div id="final-accuracy" class="text-2xl font-extrabold text-emerald-400">0%</div>
+        </div>
+        <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
+          <div class="text-xs text-slate-400 mb-1">Benar / Total</div>
+          <div id="final-correct" class="text-2xl font-extrabold text-white">0/50</div>
+        </div>
+        <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
+          <div class="text-xs text-slate-400 mb-1">Max Combo 🔥</div>
+          <div id="final-streak" class="text-2xl font-extrabold text-amber-400">0</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+        <button onclick="restartSameSettings()" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition">
+          🔄 Main Lagi
+        </button>
+        <button id="retry-wrong-btn" onclick="retryWrongQuestions()" class="hidden px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/20 transition">
+          🎯 Latih Soal yang Salah Saja
+        </button>
+        <button onclick="backToMenu()" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+          🏠 Menu Utama
+        </button>
+      </div>
+
+      <!-- Review List -->
+      <div class="text-left max-w-3xl mx-auto">
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-3">📋 Rincian Jawaban & Pembahasan:</h3>
+        <div id="review-list" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Kumpulan Teks Bacaan (Passages)
+    const PASSAGES = {
+      announcement: {
+        title: "ANNOUNCEMENT (Soal 24–25)",
+        text: `<p><strong>To: All Grade 12 Students</strong></p>
+               <p>Please be informed that the final simulation for the Academic Ability Test (TKA) will be held on Monday, November 9, 2026, at the Main Computer Lab. Each participant must bring their student ID card and log in 15 minutes prior to the session. Students who fail to attend without a valid medical certificate will not receive a simulation diagnostic report.</p>
+               <p class="italic text-slate-400">— Academic Committee</p>`
+      },
+      text1: {
+        title: "TEKS 1: Raja Ampat (Soal 27–29)",
+        text: `<p>Raja Ampat, located off the northwest tip of Bird's Head Peninsula on the island of New Guinea, is an archipelago comprising over 1,500 small islands, cays, and shoals. According to Conservation International, marine surveys suggest that the marine life diversity in the Raja Ampat area is the highest recorded on Earth. Endemic species, vibrant coral reefs, and crystal-clear turquoise waters make it a paradise for scuba divers worldwide. Above the water, towering karst islands covered in lush green vegetation create a breathtaking panoramic view that leaves visitors in awe.</p>`
+      },
+      text2: {
+        title: "TEKS 2: National Robotics Competition (Soal 30–32)",
+        text: `<p>Last month, my school team participated in a national robotics competition in Jakarta. We had spent three months building and programming our autonomous line-follower robot. On the morning of the tournament, during the final calibration, our main sensor suddenly malfunctioned. Panic set in as we only had twenty minutes before our first match. Fortunately, our team leader stayed calm and realized that a wire had come loose during travel. We quickly soldered it back in place just two minutes before our name was called. Although we only secured second place in the end, overcoming that nerve-wracking crisis together was an unforgettable experience.</p>`
+      },
+      text3: {
+        title: "TEKS 3: The Wise Old Carpenter (Soal 33–35)",
+        text: `<p>Once upon a time, a wise old carpenter was ready to retire. He told his employer of his plans to leave the house-building business to live a more leisurely life with his family. The employer was sorry to see his good worker go and asked if he could build just one more house as a personal favor. The carpenter agreed, but over time it was easy to see that his heart was not in his work. He resorted to shoddy workmanship and used inferior materials. It was an unfortunate way to end a dedicated career. When the carpenter finished his work, his employer handed him the front-door key and said, "This is your house, my gift to you." The carpenter was shocked! If he had only known he was building his own house, he would have done it all so differently.</p>`
+      },
+      text4: {
+        title: "TEKS 4: Microplastics Crisis (Soal 36–39)",
+        text: `<p>Microplastics—tiny plastic particles less than five millimeters in size—have infiltrated almost every corner of our planet, from the deepest ocean trenches to the air we breathe. Recent clinical studies have detected microplastics in human blood, lungs, and even placental tissue.</p>
+               <p>Firstly, the primary source of these particles is the breakdown of larger plastic debris, synthetic clothing fibers washed into wastewater, and single-use packaging. Once in the environment, they do not biodegrade; instead, they accumulate in the food chain, particularly in seafood. Secondly, chemical additives present in plastics, such as bisphenols and phthalates, are known endocrine disruptors. Continuous exposure to these toxins can trigger chronic inflammation, oxidative stress, and hormonal imbalances in humans.</p>
+               <p>Given these alarming findings, governments must enforce stricter regulations on single-use plastics and mandate industrial filtration systems. Furthermore, consumers should actively reduce their reliance on disposable plastic products and switch to sustainable alternatives before the health crisis becomes irreversible.</p>`
+      },
+      text5: {
+        title: "TEKS 5: Urban Heat Islands (Soal 40–42)",
+        text: `<p>Urban heat islands (UHIs) occur when cities experience much warmer temperatures than nearby rural areas. This phenomenon happens primarily because natural land surfaces, such as forests and grasslands, are replaced with dense concentrations of pavement, buildings, and other surfaces that absorb and retain heat.</p>
+               <p>During the day, dark surfaces like asphalt roads and concrete rooftops absorb a high percentage of solar radiation rather than reflecting it. Additionally, tall buildings trap heat between them and block cooling wind currents, while waste heat from vehicles, factories, and air conditioning units further elevates local temperatures. At night, while rural areas cool down rapidly, the heat stored in urban structures is slowly released into the air, keeping city temperatures abnormally high.</p>`
+      },
+      text6: {
+        title: "TEKS 6: Remote Working Debate (Soal 43–46)",
+        text: `<p>The rapid adoption of remote working (Working from Home) has sparked an ongoing debate among corporate leaders and economists.</p>
+               <p>Proponents of remote work argue that eliminating daily commutes saves employees hours of stressful travel time and significantly reduces carbon footprints. Studies also show that many workers report higher job satisfaction and better work-life balance when given the flexibility to manage their own schedules. For companies, reducing physical office space translates into substantial savings on rent and utilities.</p>
+               <p>On the other hand, critics point out that remote work can erode team cohesion and spontaneous creativity that often happens during face-to-face interactions. Junior employees may struggle with mentorship and career visibility when working in isolation. Moreover, blurred boundaries between home and office life have led many remote workers to experience digital burnout and longer working hours.</p>
+               <p>Ultimately, rather than choosing an all-or-nothing approach, many organizations are finding that a hybrid model offers the most balanced solution for modern workplaces.</p>`
+      },
+      text7: {
+        title: "TEKS 7: BRIN AI Early Warning System (Soal 47–50)",
+        text: `<p><strong>JAKARTA</strong> — Indonesia’s National Research and Innovation Agency (BRIN) announced on Tuesday the launch of a new AI-powered early warning system designed to detect coastal flooding and extreme weather anomalies across the archipelago.</p>
+               <p>Built in collaboration with local meteorological experts, the system integrates real-time satellite imagery with ocean sensor networks to predict tidal surges up to 72 hours in advance—doubling the accuracy of previous models.</p>
+               <p>"With climate change intensifying coastal risks, giving coastal communities an extra two days to prepare can save thousands of lives and minimize economic losses," said Dr. Hendra Wijaya, Lead Coordinator of the Maritime Technology Division, during the press conference in Jakarta. The system will first be deployed in northern Java and Sumatra next month before expanding nationwide.</p>`
+      }
+    };
+
+    // Data 50 Soal Lengkap
+    const ALL_QUESTIONS = [
+      // I. GRAMMAR & STRUCTURE (1-20)
+      {
+        id: 1, category: 'grammar', catLabel: 'Grammar & Tenses',
+        q: `Look at the dark clouds! It _______ heavily in a few minutes.`,
+        options: [`rains`, `is going to rain`, `will have rained`, `rained`, `has been raining`],
+        ans: 1,
+        exp: `Gunakan <strong>be going to + V1</strong> (<em>is going to rain</em>) untuk prediksi yang memiliki bukti fisik terlihat saat ini (<em>Look at the dark clouds!</em>).`
+      },
+      {
+        id: 2, category: 'grammar', catLabel: 'Grammar & Tenses',
+        q: `While the technician _______ the server, the power suddenly went out.`,
+        options: [`repairs`, `has repaired`, `was repairing`, `had repaired`, `is repairing`],
+        ans: 2,
+        exp: `Rumus kejadian yang sedang berlangsung di masa lalu saat dipotong kejadian lain: <strong>While + Past Continuous (was/were + V-ing), Simple Past (V2)</strong>.`
+      },
+      {
+        id: 3, category: 'grammar', catLabel: 'Grammar & Tenses',
+        q: `By the time the rescue team arrived at the village, the residents _______ to a safer place.`,
+        options: [`evacuated`, `have evacuated`, `were evacuating`, `had evacuated`, `will have evacuated`],
+        ans: 3,
+        exp: `Kejadian yang <strong>sudah selesai lebih dulu</strong> sebelum kejadian masa lalu lainnya (<em>arrived</em>) menggunakan <strong>Past Perfect Tense (had + V3)</strong>.`
+      },
+      {
+        id: 4, category: 'grammar', catLabel: 'Grammar & Tenses',
+        q: `By the end of this year, my sister _______ her study at the university.`,
+        options: [`completes`, `will be completing`, `has completed`, `will have completed`, `had completed`],
+        ans: 3,
+        exp: `Penanda waktu <strong>"By + waktu masa depan"</strong> (<em>By the end of this year</em>) adalah ciri khas <strong>Future Perfect Tense (will have + V3)</strong>.`
+      },
+      {
+        id: 5, category: 'grammar', catLabel: 'Grammar & Tenses',
+        q: `We have been waiting for the announcement _______ two hours, _______ 8 o'clock this morning.`,
+        options: [`since / for`, `for / since`, `during / from`, `for / from`, `since / since`],
+        ans: 1,
+        exp: `<strong>For</strong> diikuti durasi waktu (<em>two hours</em>), sedangkan <strong>since</strong> diikuti titik awal waktu spesifik (<em>8 o'clock</em>).`
+      },
+      {
+        id: 6, category: 'grammar', catLabel: 'Passive Voice',
+        q: `A new renewable energy plant _______ in this district right now to reduce carbon emissions.`,
+        options: [`builds`, `is building`, `is being built`, `has built`, `was being built`],
+        ans: 2,
+        exp: `Subjek adalah benda (<em>energy plant</em> = dibangun) dan ada keterangan <em>right now</em> (Present Continuous). Rumus pasifnya: <strong>is/am/are + being + V3</strong>.`
+      },
+      {
+        id: 7, category: 'grammar', catLabel: 'Passive Voice',
+        q: `All safety regulations must _______ by every visitor entering the laboratory.`,
+        options: [`follow`, `be following`, `have followed`, `be followed`, `followed`],
+        ans: 3,
+        exp: `Kalimat pasif setelah kata bantu <em>Modal (must, can, will, should)</em> memiliki rumus: <strong>Modal + be + V3</strong> (<em>must be followed</em>).`
+      },
+      {
+        id: 8, category: 'grammar', catLabel: 'Conditional Sentences',
+        q: `If I _______ enough money right now, I would upgrade my computer specifications.`,
+        options: [`have`, `had`, `had had`, `would have`, `have had`],
+        ans: 1,
+        exp: `Ini adalah <strong>Conditional Sentence Type 2</strong> (<em>right now</em>, klausa utama <em>would + V1</em>). Maka klausa <em>If</em> wajib menggunakan <strong>Simple Past (V2 = had)</strong>.`
+      },
+      {
+        id: 9, category: 'grammar', catLabel: 'Conditional Sentences',
+        q: `"If the driver had been more careful, the accident would not have happened." What is the fact behind the sentence above?`,
+        options: [
+          `The driver is careless, so the accident happens.`,
+          `The driver was not careful, so the accident happened.`,
+          `The driver was careful, so the accident did not happen.`,
+          `The driver had been careful, but the accident happened.`,
+          `The accident will not happen if the driver is careful.`
+        ],
+        ans: 1,
+        exp: `Kalimat soal adalah <strong>Conditional Type 3</strong> (penyesalan masa lalu). Faktanya harus dalam <strong>Simple Past Tense</strong> dan berlawanan sifat (positif jadi negatif, negatif jadi positif).`
+      },
+      {
+        id: 10, category: 'grammar', catLabel: 'Conditional Inversion',
+        q: `_______ I known that the traffic was completely gridlocked, I would have taken the commuter train instead.`,
+        options: [`If`, `Were`, `Should`, `Had`, `Unless`],
+        ans: 3,
+        exp: `Bentuk <strong>Inversi Conditional Type 3</strong> menghilangkan kata <em>"If"</em> dan memindahkan <strong>Had</strong> ke depan subjek: <em>"Had I known..."</em> (= <em>If I had known...</em>).`
+      },
+      {
+        id: 11, category: 'grammar', catLabel: 'Relative Clauses',
+        q: `The scientist _______ research on battery efficiency won the international award is from Indonesia.`,
+        options: [`who`, `whom`, `whose`, `which`, `where`],
+        ans: 2,
+        exp: `Setelah titik-titik terdapat kata benda <em>research</em> milik sang ilmuwan. Kata penghubung kepemilikan adalah <strong>whose</strong>.`
+      },
+      {
+        id: 12, category: 'grammar', catLabel: 'Relative Clauses',
+        q: `The candidates _______ the committee interviewed yesterday showed impressive analytical skills.`,
+        options: [`who`, `whom`, `whose`, `which`, `when`],
+        ans: 1,
+        exp: `<em>The candidates</em> berperan sebagai objek yang diwawancarai oleh komite (diikuti <em>Subjek + Verb: the committee interviewed</em>), sehingga menggunakan <strong>whom</strong>.`
+      },
+      {
+        id: 13, category: 'grammar', catLabel: 'Conjunctions',
+        q: `_______ the heavy rain and strong winds, the outdoor music festival continued as scheduled.`,
+        options: [`Although`, `Because of`, `Despite`, `Even though`, `However`],
+        ans: 2,
+        exp: `Kalimat menunjukkan pertentangan dan diikuti oleh <strong>Noun Phrase</strong> (<em>the heavy rain and strong winds</em>, tanpa kata kerja), sehingga wajib menggunakan <strong>Despite</strong>.`
+      },
+      {
+        id: 14, category: 'grammar', catLabel: 'Conjunctions',
+        q: `Many flights were delayed for several hours _______ the thick fog covering the runway.`,
+        options: [`because`, `since`, `due to`, `although`, `therefore`],
+        ans: 2,
+        exp: `Hubungan sebab-akibat yang diikuti oleh <strong>Noun Phrase</strong> (<em>the thick fog...</em>) menggunakan <strong>due to / because of / owing to</strong>.`
+      },
+      {
+        id: 15, category: 'grammar', catLabel: 'Subject-Verb Agreement',
+        q: `Neither the manager nor the employees _______ aware of the sudden policy change yesterday.`,
+        options: [`is`, `are`, `was`, `were`, `has been`],
+        ans: 3,
+        exp: `Pada <em>Neither... nor...</em>, kata kerja mengikuti subjek terdekat (<em>the employees</em> = jamak) dan waktu lampau (<em>yesterday</em>), maka jawabannya <strong>were</strong>.`
+      },
+      {
+        id: 16, category: 'grammar', catLabel: 'Causative Verbs',
+        q: `Since my printer was broken, I had the technician _______ it before the deadline.`,
+        options: [`fix`, `to fix`, `fixed`, `fixing`, `fixes`],
+        ans: 0,
+        exp: `Rumus <strong>Causative Have Aktif</strong> (objek orang = <em>the technician</em>): <strong>S + had + Objek Orang + V1 murni (fix)</strong>.`
+      },
+      {
+        id: 17, category: 'grammar', catLabel: 'Causative Verbs',
+        q: `Dina needed a formal photo for her application, so she got her picture _______ at a professional studio.`,
+        options: [`take`, `to take`, `took`, `taken`, `taking`],
+        ans: 3,
+        exp: `Rumus <strong>Causative Get Pasif</strong> (objek benda = <em>her picture</em>): <strong>S + got + Objek Benda + V3 (taken)</strong>.`
+      },
+      {
+        id: 18, category: 'grammar', catLabel: 'Reported Speech',
+        q: `Rian said, "I submitted my project report yesterday." If we change it into indirect speech, it becomes:`,
+        options: [
+          `Rian said that he submitted his project report yesterday.`,
+          `Rian said that he had submitted his project report the day before.`,
+          `Rian said that he has submitted his project report the previous day.`,
+          `Rian said that I had submitted my project report yesterday.`,
+          `Rian said that he would submit his project report the next day.`
+        ],
+        ans: 1,
+        exp: `Dalam <em>Reported Speech</em>, <strong>Simple Past (submitted)</strong> mundur satu tahap menjadi <strong>Past Perfect (had submitted)</strong>, dan <em>yesterday</em> menjadi <em>the day before</em>.`
+      },
+      {
+        id: 19, category: 'grammar', catLabel: 'Modals & Advice',
+        q: `You look pale and exhausted. You _______ take a rest and see a doctor immediately.`,
+        options: [`might`, `would rather`, `had better`, `could`, `may`],
+        ans: 2,
+        exp: `<strong>Had better + V1</strong> digunakan untuk memberikan saran kuat yang mendesak (jika tidak dilakukan akan ada dampak buruk).`
+      },
+      {
+        id: 20, category: 'grammar', catLabel: 'Gerund & Infinitive',
+        q: `The company decided to postpone _______ the new product until the market condition stabilizes.`,
+        options: [`launch`, `to launch`, `launched`, `launching`, `launches`],
+        ans: 3,
+        exp: `Kata kerja <strong>postpone</strong> (menunda) wajib diikuti oleh <strong>Gerund (V-ing = launching)</strong>.`
+      },
+
+      // II. FUNCTIONAL EXPRESSIONS & SHORT TEXTS (21-26)
+      {
+        id: 21, category: 'functional', catLabel: 'Expressions',
+        q: `Rani: "Dad, I finally passed the national scholarship selection!"\nFather: "_______! Your hard work and sleepless nights really paid off."`,
+        options: [
+          `What a pity`,
+          `I doubt that`,
+          `That’s a relief, I'm sorry`,
+          `Congratulations, I'm so proud of you`,
+          `Don't mention it`
+        ],
+        ans: 3,
+        exp: `Ungkapan selamat dan kebanggaan (<em>Congratulating & Complimenting</em>) atas keberhasilan lolos beasiswa.`
+      },
+      {
+        id: 22, category: 'functional', catLabel: 'Expressions',
+        q: `Kevin: "We need to boost our team's productivity this month. Do you have any ideas?"\nSarah: "_______ holding a brief daily evaluation every morning?"`,
+        options: [`I suggest we should`, `Why don't we`, `How about`, `Let's`, `Would you like to`],
+        ans: 2,
+        exp: `Setelah titik-titik terdapat kata kerja bentuk <strong>V-ing (holding)</strong>. Ungkapan saran yang diikuti <em>V-ing</em> adalah <strong>How about / What about</strong>.`
+      },
+      {
+        id: 23, category: 'functional', catLabel: 'Expressions',
+        q: `Aldo: "In my opinion, artificial intelligence will completely replace human teachers in the next five years."\nBela: "_______ Technology is a great tool, but human empathy and mentorship cannot be coded."`,
+        options: [
+          `I couldn't agree more.`,
+          `That’s exactly what I think.`,
+          `I'm afraid I have to disagree with you.`,
+          `You have a point there, I totally support it.`,
+          `I have no objection to that.`
+        ],
+        ans: 2,
+        exp: `Kalimat Bela membantah pendapat Aldo. Maka ungkapan yang tepat adalah ketidaksetujuan yang sopan: <strong>"I'm afraid I have to disagree with you."</strong>`
+      },
+      {
+        id: 24, category: 'functional', catLabel: 'Short Functional Text',
+        passageKey: 'announcement',
+        q: `What is the main purpose of the announcement?`,
+        options: [
+          `To invite students to build a new computer lab.`,
+          `To inform twelfth graders about the schedule and rules of the TKA simulation.`,
+          `To distribute the diagnostic report of the previous examination.`,
+          `To remind teachers to submit examination questions.`,
+          `To announce the winners of the Academic Ability Test.`
+        ],
+        ans: 1,
+        exp: `Pengumuman tersebut ditujukan kepada siswa kelas 12 untuk menginformasikan jadwal serta ketentuan simulasi final TKA.`
+      },
+      {
+        id: 25, category: 'functional', catLabel: 'Short Functional Text',
+        passageKey: 'announcement',
+        q: `According to the text, what happens if a student misses the simulation due to oversleeping?`,
+        options: [
+          `They will be allowed to take the test on Tuesday.`,
+          `They will not get their simulation diagnostic report.`,
+          `Their student ID card will be confiscated.`,
+          `They must pay a fine to the Academic Committee.`,
+          `They can still log in 15 minutes after the session ends.`
+        ],
+        ans: 1,
+        exp: `Berdasarkan kalimat terakhir: siswa yang tidak hadir tanpa surat keterangan medis resmi tidak akan menerima laporan diagnostik simulasi.`
+      },
+      {
+        id: 26, category: 'functional', catLabel: 'Application Letter',
+        q: `In an application letter, the sentence "I have attached my curriculum vitae and portfolio for your review. I look forward to the opportunity of discussing my qualifications in an interview" is placed in the...`,
+        options: [`Salutation`, `Opening paragraph`, `Body paragraph (Experience section)`, `Closing paragraph`, `Inside address`],
+        ans: 3,
+        exp: `Kalimat yang menyebutkan lampiran berkas dan harapan untuk dipanggil wawancara selalu diletakkan di <strong>paragraf penutup (Closing paragraph)</strong> surat lamaran kerja.`
+      },
+
+      // III. READING COMPREHENSION & TEXT GENRES (27-50)
+      {
+        id: 27, category: 'reading', catLabel: 'Descriptive Text',
+        passageKey: 'text1',
+        q: `What is the genre of the text above?`,
+        options: [`Recount Text`, `Narrative Text`, `Descriptive Text`, `Explanation Text`, `Procedure Text`],
+        ans: 2,
+        exp: `Teks tersebut mendeskripsikan karakteristik dan keindahan tempat spesifik (Raja Ampat), sehingga termasuk <strong>Descriptive Text</strong>.`
+      },
+      {
+        id: 28, category: 'reading', catLabel: 'Descriptive Text',
+        passageKey: 'text1',
+        q: `Why is Raja Ampat considered a paradise for scuba divers?`,
+        options: [
+          `Because it is located on the island of New Guinea.`,
+          `Because it has the highest recorded marine life diversity on Earth.`,
+          `Because it has over 1,500 karst islands with lush vegetation.`,
+          `Because Conservation International built a resort there.`,
+          `Because it is free from any marine predators.`
+        ],
+        ans: 1,
+        exp: `Sesuai kalimat ke-2 dan ke-3: keanekaragaman hayati bawah lautnya tertinggi di Bumi dengan spesies endemik dan terumbu karang yang indah.`
+      },
+      {
+        id: 29, category: 'reading', catLabel: 'Vocabulary in Context',
+        passageKey: 'text1',
+        q: `The word "breathtaking" in the last sentence is closest in meaning to...`,
+        options: [`Suffocating`, `Ordinary`, `Magnificent`, `Exhausting`, `Frightening`],
+        ans: 2,
+        exp: `<strong>Breathtaking</strong> berarti sangat menakjubkan / memukau, bersinonim dengan <strong>Magnificent</strong>.`
+      },
+      {
+        id: 30, category: 'reading', catLabel: 'Recount Text',
+        passageKey: 'text2',
+        q: `What caused the robot's sensor to malfunction before the match?`,
+        options: [
+          `The programming code was accidentally deleted.`,
+          `The battery ran out of power during calibration.`,
+          `A wire became loose during the trip to Jakarta.`,
+          `The team leader forgot to bring the soldering iron.`,
+          `Another team sabotaged their autonomous robot.`
+        ],
+        ans: 2,
+        exp: `Tertulis jelas pada kalimat ke-5: <em>"...realized that a wire had come loose during travel."</em>`
+      },
+      {
+        id: 31, category: 'reading', catLabel: 'Recount Text',
+        passageKey: 'text2',
+        q: `How did the writer feel at the end of the competition?`,
+        options: [
+          `Deeply regretful and furious at the team leader.`,
+          `Disappointed because they failed to enter the match.`,
+          `Proud and grateful for the memorable teamwork experience.`,
+          `Indifferent because robotics was not their passion.`,
+          `Embarrassed by the second-place trophy.`
+        ],
+        ans: 2,
+        exp: `Kalimat terakhir menyebutkan bahwa keberhasilan melewati krisis bersama tim tersebut adalah pengalaman yang tak terlupakan (<em>unforgettable experience</em>).`
+      },
+      {
+        id: 32, category: 'reading', catLabel: 'Recount Text',
+        passageKey: 'text2',
+        q: `What tense is predominantly used in the text above, and why?`,
+        options: [
+          `Simple Present Tense, because it states general truths about robots.`,
+          `Simple Past Tense, because it retells past events chronologically.`,
+          `Present Perfect Tense, because the competition is still ongoing.`,
+          `Future Tense, because it plans for the next tournament.`,
+          `Passive Voice, because the focus is on the robot, not the team.`
+        ],
+        ans: 1,
+        exp: `<strong>Recount Text</strong> menggunakan <strong>Simple Past Tense</strong> karena menceritakan kembali kejadian masa lampau secara berurutan.`
+      },
+      {
+        id: 33, category: 'reading', catLabel: 'Narrative Text',
+        passageKey: 'text3',
+        q: `Why did the carpenter use inferior materials for the last house?`,
+        options: [
+          `The employer did not give him enough budget.`,
+          `He wanted to take revenge on his employer.`,
+          `He lacked the skill to build a proper house.`,
+          `He was no longer wholeheartedly committed to the job.`,
+          `He was in a hurry to move to another country.`
+        ],
+        ans: 3,
+        exp: `Tertulis pada kalimat ke-4: <em>"...his heart was not in his work"</em> (dia sudah tidak lagi sepenuh hati dalam bekerja karena ingin pensiun).`
+      },
+      {
+        id: 34, category: 'reading', catLabel: 'Narrative Text',
+        passageKey: 'text3',
+        q: `What is the moral value (coda) of the story?`,
+        options: [
+          `Never accept gifts from your employer before retiring.`,
+          `Always give your best effort in everything you do, because your choices shape your own future.`,
+          `Building a house requires expensive materials and young workers.`,
+          `Retirement should be delayed for as long as possible.`,
+          `It is better to refuse a favor than to work without payment.`
+        ],
+        ans: 1,
+        exp: `Pesan moral dari kisah tukang kayu tersebut adalah selalu berikan usaha terbaik dalam setiap pekerjaan karena hasilnya akan kembali kepada diri kita sendiri.`
+      },
+      {
+        id: 35, category: 'reading', catLabel: 'Vocabulary in Context',
+        passageKey: 'text3',
+        q: `The word "shoddy" in the text is closest in meaning to...`,
+        options: [`Poor-quality`, `Luxurious`, `Traditional`, `Expensive`, `Innovative`],
+        ans: 0,
+        exp: `<strong>Shoddy</strong> berarti dikerjakan dengan buruk / berkualitas rendah (<strong>Poor-quality</strong>).`
+      },
+      {
+        id: 36, category: 'reading', catLabel: 'Exposition Text',
+        passageKey: 'text4',
+        q: `What type of text is the passage above?`,
+        options: [`Analytical Exposition`, `Hortatory Exposition`, `Explanation Text`, `Discussion Text`, `Review Text`],
+        ans: 1,
+        exp: `Teks ini memaparkan argumen tentang bahaya mikroplastik dan ditutup dengan <strong>Recommendation</strong> (saran tindakan), sehingga merupakan <strong>Hortatory Exposition</strong>.`
+      },
+      {
+        id: 37, category: 'reading', catLabel: 'Exposition Text',
+        passageKey: 'text4',
+        q: `What distinguishes the last paragraph of this text as a Hortatory Exposition?`,
+        options: [
+          `It restates the thesis without offering any action plan.`,
+          `It provides both positive and negative sides of microplastics.`,
+          `It gives a strong recommendation on what governments and consumers must/should do.`,
+          `It explains the step-by-step chemical process of making plastic.`,
+          `It quotes a famous journalist from a daily newspaper.`
+        ],
+        ans: 2,
+        exp: `Ciri khas paragraf terakhir <strong>Hortatory Exposition</strong> adalah adanya <em>Recommendation</em> yang menggunakan modal <strong>must / should</strong>.`
+      },
+      {
+        id: 38, category: 'reading', catLabel: 'Exposition Text',
+        passageKey: 'text4',
+        q: `According to the text, how do microplastics enter the human food chain?`,
+        options: [
+          `Through biodegradable organic fertilizers.`,
+          `By accumulating in marine organisms and seafood after breaking down in the environment.`,
+          `Through hospital medical equipment only.`,
+          `By evaporating directly into rain clouds.`,
+          `Through natural mineral rocks in mountain springs.`
+        ],
+        ans: 1,
+        exp: `Sesuai paragraf ke-2: partikel plastik tidak terurai secara hayati melainkan terakumulasi dalam rantai makanan, terutama pada <em>seafood</em>.`
+      },
+      {
+        id: 39, category: 'reading', catLabel: 'Author Tone',
+        passageKey: 'text4',
+        q: `What is the author’s tone throughout the passage?`,
+        options: [`Humorous and sarcastic`, `Apathetic and indifferent`, `Urgent and concerned`, `Nostalgic and romantic`, `Doubtful and hesitant`],
+        ans: 2,
+        exp: `Pilihan kata seperti <em>alarming findings, health crisis, irreversible</em> menunjukkan nada penulis yang peduli dan mendesak (<strong>Urgent and concerned</strong>).`
+      },
+      {
+        id: 40, category: 'reading', catLabel: 'Explanation Text',
+        passageKey: 'text5',
+        q: `What is the main purpose of the text?`,
+        options: [
+          `To persuade people to move from cities to rural villages.`,
+          `To explain how and why the Urban Heat Island phenomenon occurs.`,
+          `To describe a specific tourist attraction in a metropolitan city.`,
+          `To criticize architects for building tall skyscrapers.`,
+          `To recount a personal experience during a summer heatwave.`
+        ],
+        ans: 1,
+        exp: `Teks ini merupakan <strong>Explanation Text</strong> yang bertujuan menjelaskan proses terjadinya fenomena ilmiah/lingkungan (<em>Urban Heat Islands</em>).`
+      },
+      {
+        id: 41, category: 'reading', catLabel: 'Explanation Text',
+        passageKey: 'text5',
+        q: `Why do rural areas cool down faster at night compared to urban areas?`,
+        options: [
+          `Because rural areas have more air conditioning units.`,
+          `Because urban structures slowly release the solar heat they absorbed and trapped during the day.`,
+          `Because rural areas receive more solar radiation during the night.`,
+          `Because tall buildings in cities generate cold wind currents at night.`,
+          `Because asphalt roads freeze immediately after sunset.`
+        ],
+        ans: 1,
+        exp: `Sesuai kalimat terakhir: struktur bangunan dan jalanan kota menyimpan panas di siang hari dan melepaskannya secara perlahan di malam hari.`
+      },
+      {
+        id: 42, category: 'reading', catLabel: 'Vocabulary in Context',
+        passageKey: 'text5',
+        q: `The word "retain" in paragraph 1 is closest in meaning to...`,
+        options: [`Release`, `Reflect`, `Keep / Hold`, `Destroy`, `Freeze`],
+        ans: 2,
+        exp: `<strong>Retain</strong> berarti menahan atau menyimpan panas (<strong>Keep / Hold</strong>).`
+      },
+      {
+        id: 43, category: 'reading', catLabel: 'Discussion Text',
+        passageKey: 'text6',
+        q: `What is the genre of the passage above?`,
+        options: [`Analytical Exposition`, `Hortatory Exposition`, `Discussion Text`, `News Item`, `Recount Text`],
+        ans: 2,
+        exp: `Teks membahas satu isu (<em>Remote Working</em>) dari dua sudut pandang berbeda: <em>Proponents</em> (Pro) dan <em>Critics</em> (Kontra), sehingga disebut <strong>Discussion Text</strong>.`
+      },
+      {
+        id: 44, category: 'reading', catLabel: 'Discussion Text',
+        passageKey: 'text6',
+        q: `Which of the following is mentioned as a disadvantage of remote working in the text?`,
+        options: [
+          `Higher expenses on office rent and electricity for companies.`,
+          `Increased carbon emissions from daily commuting.`,
+          `Potential digital burnout and lack of spontaneous team collaboration.`,
+          `Excessive face-to-face meetings with senior mentors.`,
+          `Complete loss of internet connection in urban areas.`
+        ],
+        ans: 2,
+        exp: `Pada paragraf ke-3 disebutkan sisi negatifnya: mengikis kohesi tim, hilangnya kreativitas spontan tatap muka, serta <em>digital burnout</em>.`
+      },
+      {
+        id: 45, category: 'reading', catLabel: 'Discussion Text',
+        passageKey: 'text6',
+        q: `What does the author suggest in the conclusion?`,
+        options: [
+          `Companies should force all employees back to the office full-time.`,
+          `Physical offices should be permanently abolished worldwide.`,
+          `Junior employees should not be hired anymore.`,
+          `A hybrid model combining remote and in-office work provides a balanced middle ground.`,
+          `Employees should be paid less if they work from home.`
+        ],
+        ans: 3,
+        exp: `Pada paragraf terakhir, penulis menyimpulkan bahwa model <em>hybrid</em> adalah solusi paling seimbang bagi tempat kerja modern.`
+      },
+      {
+        id: 46, category: 'reading', catLabel: 'Vocabulary in Context',
+        passageKey: 'text6',
+        q: `The phrase "Proponents of remote work" in paragraph 2 refers to people who...`,
+        options: [
+          `Strongly oppose working from home.`,
+          `Support and advocate for remote working.`,
+          `Own commercial real estate buildings.`,
+          `Have never used a computer for work.`,
+          `Regulate public transportation taxes.`
+        ],
+        ans: 1,
+        exp: `<strong>Proponents</strong> berarti para pendukung atau pihak yang setuju terhadap suatu gagasan.`
+      },
+      {
+        id: 47, category: 'reading', catLabel: 'News Item Text',
+        passageKey: 'text7',
+        q: `What is the text mainly about?`,
+        options: [
+          `The history of satellite imagery in Southeast Asia.`,
+          `A severe coastal flood that destroyed northern Java on Tuesday.`,
+          `The launch of a new AI-based early warning system for coastal flooding by BRIN.`,
+          `A debate between politicians regarding the budget of BRIN.`,
+          `How to manually repair broken ocean sensors.`
+        ],
+        ans: 2,
+        exp: `Paragraf pertama (<em>Main Event</em>) menjelaskan peluncuran sistem peringatan dini banjir pesisir berbasis AI oleh BRIN.`
+      },
+      {
+        id: 48, category: 'reading', catLabel: 'News Item Text',
+        passageKey: 'text7',
+        q: `In the structure of a News Item Text, Dr. Hendra Wijaya’s statement in the third paragraph functions as the...`,
+        options: [`Main Event / Newsworthy Event`, `Orientation`, `Complication`, `Source (Sumber Berita)`, `Re-orientation`],
+        ans: 3,
+        exp: `Dalam <strong>News Item Text</strong>, kutipan pernyataan dari pejabat, saksi, atau ahli berfungsi sebagai <strong>Source (Sumber Berita)</strong>.`
+      },
+      {
+        id: 49, category: 'reading', catLabel: 'News Item Text',
+        passageKey: 'text7',
+        q: `How does the new system improve upon previous models?`,
+        options: [
+          `It completely stops climate change from happening.`,
+          `It doubles the prediction accuracy and forecasts tidal surges up to 72 hours ahead.`,
+          `It replaces all human meteorologists with robots.`,
+          `It operates without using any satellites or ocean sensors.`,
+          `It costs nothing to build and maintain.`
+        ],
+        ans: 1,
+        exp: `Sesuai paragraf ke-2: sistem baru ini mampu memprediksi gelombang pasang hingga 72 jam sebelumnya dan menggandakan akurasi model terdahulu.`
+      },
+      {
+        id: 50, category: 'reading', catLabel: 'Vocabulary in Context',
+        passageKey: 'text7',
+        q: `What does the word "deployed" (in "will first be deployed") most nearly mean?`,
+        options: [`Cancelled`, `Put into use / Implemented`, `Purchased`, `Investigated`, `Hidden`],
+        ans: 1,
+        exp: `<strong>Deployed</strong> berarti diterjunkan, dipasang, atau mulai digunakan secara efektif (<strong>Put into use / Implemented</strong>).`
+      }
+    ];
+
+    // State Permainan
+    let selectedCategory = 'all';
+    let selectedMode = 'zen'; // 'zen', 'survival', 'shuffle'
+    let activeQuestions = [];
+    let currentIndex = 0;
+    let userAnswers = {}; // { questionId: selectedOptionIndex }
+    let score = 0;
+    let streak = 0;
+    let maxStreak = 0;
+    let lives = 5;
+
+    // Pilih Kategori di Menu
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        if (btn.dataset.cat === cat) {
+          btn.className = "cat-btn active-cat p-4 rounded-2xl border-2 border-indigo-500 bg-indigo-600/20 text-left transition";
+        } else {
+          btn.className = "cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500";
+        }
+      });
+    }
+
+    // Pilih Mode di Menu
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        if (btn.dataset.mode === mode) {
+          btn.className = "mode-btn active-mode p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-600/20 text-left transition";
+        } else {
+          btn.className = "mode-btn p-3.5 rounded-xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500";
+        }
+      });
+    }
+
+    // Mulai Game
+    function startGame(customQuestionList = null) {
+      if (customQuestionList) {
+        activeQuestions = [...customQuestionList];
+      } else {
+        activeQuestions = ALL_QUESTIONS.filter(q => selectedCategory === 'all' ? true : q.category === selectedCategory);
+        if (selectedMode === 'shuffle') {
+          activeQuestions.sort(() => Math.random() - 0.5);
+        }
+      }
+
+      currentIndex = 0;
+      userAnswers = {};
+      score = 0;
+      streak = 0;
+      maxStreak = 0;
+      lives = 5;
+
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+      document.getElementById('hud-stats').classList.remove('hidden');
+
+      updateHUD();
+      renderQuestion();
+    }
+
+    function updateHUD() {
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('streak-display').textContent = streak;
+      if (selectedMode === 'survival') {
+        document.getElementById('lives-display').textContent = '❤️'.repeat(lives) + '🖤'.repeat(5 - lives);
+      } else {
+        document.getElementById('lives-display').textContent = '♾️ Mode Zen';
+      }
+    }
+
+    function renderQuestion() {
+      const qObj = activeQuestions[currentIndex];
+      const total = activeQuestions.length;
+
+      // Update Progress & Badges
+      document.getElementById('question-badge').textContent = `Soal ${currentIndex + 1} / ${total} (#${qObj.id})`;
+      document.getElementById('category-badge').textContent = qObj.catLabel;
+      const pct = Math.round(((currentIndex + 1) / total) * 100);
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+
+      // Tampilkan Passage jika ada
+      const passageContainer = document.getElementById('passage-container');
+      if (qObj.passageKey && PASSAGES[qObj.passageKey]) {
+        passageContainer.classList.remove('hidden');
+        document.getElementById('passage-title').textContent = `📖 ${PASSAGES[qObj.passageKey].title}`;
+        document.getElementById('passage-content').innerHTML = PASSAGES[qObj.passageKey].text;
+      } else {
+        passageContainer.classList.add('hidden');
+      }
+
+      // Render Pertanyaan
+      document.getElementById('question-text').innerHTML = qObj.q.replace(/\n/g, '<br>');
+
+      // Render Pilihan Jawaban
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D', 'E'];
+      const alreadyAnswered = userAnswers.hasOwnProperty(qObj.id);
+      const chosenIdx = userAnswers[qObj.id];
+
+      qObj.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.disabled = alreadyAnswered;
+
+        let baseStyle = "option-btn w-full text-left p-3.5 md:p-4 rounded-2xl border-2 flex items-start gap-3.5 ";
+        let badgeStyle = "w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-xs shrink-0 mt-0.5 ";
+
+        if (!alreadyAnswered) {
+          baseStyle += "border-slate-700/80 bg-slate-800/50 text-slate-100";
+          badgeStyle += "bg-slate-700 text-slate-200";
+        } else {
+          if (idx === qObj.ans) {
+            baseStyle += "border-emerald-500 bg-emerald-500/20 text-white font-semibold";
+            badgeStyle += "bg-emerald-500 text-slate-950";
+          } else if (idx === chosenIdx && chosenIdx !== qObj.ans) {
+            baseStyle += "border-rose-500 bg-rose-500/20 text-rose-200";
+            badgeStyle += "bg-rose-500 text-white";
+          } else {
+            baseStyle += "border-slate-800 bg-slate-900/40 text-slate-500 opacity-65";
+            badgeStyle += "bg-slate-800 text-slate-500";
+          }
+        }
+
+        btn.className = baseStyle;
+        btn.innerHTML = `
+          <span class="${badgeStyle}">${letters[idx]}</span>
+          <span class="text-sm md:text-base leading-snug">${optText}</span>
+        `;
+
+        btn.onclick = () => handleAnswer(idx);
+        optionsContainer.appendChild(btn);
+      });
+
+      // Tampilkan Feedback jika sudah dijawab
+      const feedbackBox = document.getElementById('feedback-box');
+      const nextBtn = document.getElementById('next-btn');
+
+      if (alreadyAnswered) {
+        const isCorrect = chosenIdx === qObj.ans;
+        feedbackBox.classList.remove('hidden');
+        if (isCorrect) {
+          feedbackBox.className = "rounded-2xl p-4 md:p-5 mb-6 border border-emerald-500/40 bg-emerald-950/40";
+          document.getElementById('feedback-icon').textContent = "🎉";
+          document.getElementById('feedback-title').className = "font-extrabold text-sm md:text-base mb-1 text-emerald-400";
+          document.getElementById('feedback-title').textContent = `Tepat Sekali! (Jawaban: ${letters[qObj.ans]})`;
+        } else {
+          feedbackBox.className = "rounded-2xl p-4 md:p-5 mb-6 border border-rose-500/40 bg-rose-950/40";
+          document.getElementById('feedback-icon').textContent = "💡";
+          document.getElementById('feedback-title').className = "font-extrabold text-sm md:text-base mb-1 text-rose-400";
+          document.getElementById('feedback-title').textContent = `Kurang Tepat! Jawaban yang benar adalah ${letters[qObj.ans]}`;
+        }
+        document.getElementById('feedback-explanation').innerHTML = qObj.exp;
+        nextBtn.classList.remove('hidden');
+        nextBtn.textContent = (currentIndex === total - 1) ? "Lihat Hasil Akhir 🏆" : "Soal Berikutnya →";
+      } else {
+        feedbackBox.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+      }
+
+      document.getElementById('prev-btn').disabled = (currentIndex === 0);
+    }
+
+    function handleAnswer(selectedIndex) {
+      const qObj = activeQuestions[currentIndex];
+      if (userAnswers.hasOwnProperty(qObj.id)) return;
+
+      userAnswers[qObj.id] = selectedIndex;
+      const isCorrect = selectedIndex === qObj.ans;
+
+      if (isCorrect) {
+        streak++;
+        if (streak > maxStreak) maxStreak = streak;
+        const bonus = Math.min(streak * 20, 100);
+        score += 100 + bonus;
+      } else {
+        streak = 0;
+        if (selectedMode === 'survival') {
+          lives--;
+        }
+      }
+
+      updateHUD();
+      renderQuestion();
+
+      // Cek apakah Game Over pada mode Survival
+      if (selectedMode === 'survival' && lives <= 0) {
+        setTimeout(() => {
+          showResults(true);
+        }, 1100);
+      }
+    }
+
+    function nextQuestion() {
+      if (currentIndex < activeQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        showResults(false);
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function showResults(isGameOver = false) {
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('hud-stats').classList.add('hidden');
+      document.getElementById('result-screen').classList.remove('hidden');
+
+      const total = activeQuestions.length;
+      let correctCount = 0;
+      const wrongList = [];
+
+      activeQuestions.forEach(q => {
+        if (userAnswers[q.id] === q.ans) {
+          correctCount++;
+        } else {
+          wrongList.push(q);
+        }
+      });
+
+      const accuracy = Math.round((correctCount / total) * 100);
+
+      document.getElementById('final-score').textContent = score;
+      document.getElementById('final-accuracy').textContent = `${accuracy}%`;
+      document.getElementById('final-correct').textContent = `${correctCount}/${total}`;
+      document.getElementById('final-streak').textContent = maxStreak;
+
+      const emojiEl = document.getElementById('result-emoji');
+      const titleEl = document.getElementById('result-title');
+      const subEl = document.getElementById('result-subtitle');
+
+      if (isGameOver) {
+        emojiEl.textContent = "💔";
+        titleEl.textContent = "Nyawa Habis (Game Over)!";
+        subEl.textContent = "Jangan menyerah! Pelajari pembahasannya di bawah lalu coba lagi.";
+      } else if (accuracy >= 85) {
+        emojiEl.textContent = "👑";
+        titleEl.textContent = "Luar Biasa! Master Bahasa Inggris TKA!";
+        subEl.textContent = "Penguasaan konsep Grammar dan Reading kamu sudah sangat matang.";
+      } else if (accuracy >= 65) {
+        emojiEl.textContent = "🌟";
+        titleEl.textContent = "Kerja Bagus! Sedikit Lagi Sempurna!";
+        subEl.textContent = "Kamu sudah menguasai sebagian besar materi, tinggal perkuat beberapa detail.";
+      } else {
+        emojiEl.textContent = "💪";
+        titleEl.textContent = "Tetap Semangat Latihan!";
+        subEl.textContent = "Coba ulangi soal-soal yang masih salah agar makin paham polanya.";
+      }
+
+      // Tombol Latih Soal yang Salah
+      const retryWrongBtn = document.getElementById('retry-wrong-btn');
+      if (wrongList.length > 0) {
+        retryWrongBtn.classList.remove('hidden');
+        retryWrongBtn.textContent = `🎯 Latih ${wrongList.length} Soal yang Salah Saja`;
+        retryWrongBtn.onclick = () => startGame(wrongList);
+      } else {
+        retryWrongBtn.classList.add('hidden');
+      }
+
+      // Render Daftar Review
+      const reviewContainer = document.getElementById('review-list');
+      reviewContainer.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D', 'E'];
+
+      activeQuestions.forEach((q, idx) => {
+        const userAns = userAnswers[q.id];
+        const isCorrect = userAns === q.ans;
+        const userAnsText = (userAns !== undefined) ? `${letters[userAns]}. ${q.options[userAns]}` : "Belum dijawab";
+        const correctAnsText = `${letters[q.ans]}. ${q.options[q.ans]}`;
+
+        const item = document.createElement('div');
+        item.className = `p-4 rounded-2xl border ${isCorrect ? 'border-emerald-500/30 bg-emerald-950/20' : 'border-rose-500/30 bg-rose-950/20'}`;
+        item.innerHTML = `
+          <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+            <span class="text-slate-300">Soal #${q.id} (${q.catLabel})</span>
+            <span class="${isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${isCorrect ? '✓ BENAR' : '✕ SALAH'}</span>
+          </div>
+          <p class="text-sm font-semibold text-white mb-2">${q.q}</p>
+          <div class="text-xs space-y-1 mb-2">
+            <p class="${isCorrect ? 'text-emerald-300' : 'text-rose-300'}"><strong>Jawabanmu:</strong> ${userAnsText}</p>
+            ${!isCorrect ? `<p class="text-emerald-300"><strong>Kunci Jawaban:</strong> ${correctAnsText}</p>` : ''}
+          </div>
+          <div class="text-xs text-slate-300 bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            💡 ${q.exp}
+          </div>
+        `;
+        reviewContainer.appendChild(item);
+      });
+    }
+
+    function restartSameSettings() {
+      startGame();
+    }
+
+    function backToMenu() {
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('hud-stats').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+    }
+
+    function confirmQuit() {
+      if (confirm("Yakin ingin keluar ke menu utama? Progres saat ini akan direset.")) {
+        backToMenu();
+      }
+    }
+  </script>
+</body>
+</html>
