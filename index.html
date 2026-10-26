@@ -3,20 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TKA English Quest - Mini Game 50 Soal SMA</title>
+  <title>TKA English Quest — SMA Mastery Hub (Kelas 10–12)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 100%);
+      background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 55%, #020617 100%);
       min-height: 100vh;
       color: #f8fafc;
+      overflow-x: hidden;
     }
     .glass-card {
-      background: rgba(30, 41, 59, 0.78);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    .glass-nav {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
     }
     .option-btn {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -26,16 +32,35 @@
       border-color: #6366f1;
       background: rgba(99, 102, 241, 0.15);
     }
-    @keyframes pulse-fast {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
+    /* 3D Flip Card CSS */
+    .perspective-1000 {
+      perspective: 1000px;
     }
-    .combo-badge {
-      animation: pulse-fast 1.2s infinite;
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
     }
-    /* Custom scrollbar for reading passages */
+    .flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 1.5rem;
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
+      height: 6px;
     }
     ::-webkit-scrollbar-track {
       background: rgba(15, 23, 42, 0.5);
@@ -44,226 +69,859 @@
       background: #475569;
       border-radius: 3px;
     }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    .float-badge {
+      animation: floatSlow 3s ease-in-out infinite;
+    }
   </style>
 </head>
-<body class="p-4 md:p-6 flex flex-col items-center justify-center">
+<body class="flex flex-col min-h-screen">
 
-  <!-- MAIN CONTAINER -->
-  <div class="w-full max-w-4xl mx-auto">
-
-    <!-- HEADER BAR -->
-    <header class="flex flex-wrap items-center justify-between gap-4 mb-6 glass-card p-4 rounded-2xl shadow-lg">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-2xl shadow-md shadow-indigo-500/30">
+  <!-- TOP NAVIGATION BAR (WEBSITE READY) -->
+  <nav class="sticky top-0 z-40 glass-nav px-4 py-3">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Logo -->
+      <div onclick="switchMainTab('study')" class="flex items-center gap-3 cursor-pointer group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition">
           🚀
         </div>
         <div>
-          <h1 class="text-lg md:text-xl font-extrabold tracking-tight text-white">TKA English Quest</h1>
-          <p class="text-xs text-slate-400">50 Soal Komprehensif SMA (Kelas 10–12)</p>
-        </div>
-      </div>
-
-      <!-- HUD STATS (Shown in Game) -->
-      <div id="hud-stats" class="hidden flex items-center gap-3 md:gap-5">
-        <div class="flex items-center gap-1.5 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700" title="Nyawa (Mode Survival)">
-          <span id="lives-display" class="text-sm tracking-widest">❤️❤️❤️❤️❤️</span>
-        </div>
-        <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl">
-          <span class="text-amber-400 text-sm">🔥 Streak:</span>
-          <span id="streak-display" class="font-bold text-amber-300 text-sm">0</span>
-        </div>
-        <div class="flex items-center gap-1.5 bg-indigo-500/15 border border-indigo-500/30 px-3.5 py-1.5 rounded-xl">
-          <span class="text-indigo-300 text-sm">⭐ Skor:</span>
-          <span id="score-display" class="font-extrabold text-white text-sm">0</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- SCREEN 1: START MENU -->
-    <section id="start-screen" class="glass-card rounded-3xl p-6 md:p-10 text-center shadow-2xl">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-4">
-        ✨ EDISI PERSIAPAN TKA & UTBK SMA
-      </div>
-      <h2 class="text-2xl md:text-4xl font-extrabold text-white mb-3">Siap Taklukkan 50 Soal Bahasa Inggris?</h2>
-      <p class="text-slate-300 text-sm md:text-base max-w-xl mx-auto mb-8 leading-relaxed">
-        Uji penguasaan materi Kelas 10 hingga Kelas 12 mulai dari <span class="text-indigo-300 font-semibold">Grammar & Structure</span>, <span class="text-emerald-300 font-semibold">Functional Expressions</span>, hingga <span class="text-amber-300 font-semibold">Reading Comprehension</span>. Jawab berturut-turut dengan benar untuk menggandakan poin!
-      </p>
-
-      <!-- PILIH KATEGORI -->
-      <div class="max-w-2xl mx-auto mb-8 text-left">
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">1. Pilih Misi Kategori Soal:</label>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="category-selector">
-          <button onclick="selectCategory('all')" data-cat="all" class="cat-btn active-cat p-4 rounded-2xl border-2 border-indigo-500 bg-indigo-600/20 text-left transition">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-bold text-white">🏆 Semua Soal (Full Marathon)</span>
-              <span class="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-md font-bold">50 Soal</span>
-            </div>
-            <p class="text-xs text-slate-300">Gabungan lengkap Grammar, Expressions, dan Reading TKA.</p>
-          </button>
-
-          <button onclick="selectCategory('grammar')" data-cat="grammar" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-bold text-white">⚡ Grammar & Structure</span>
-              <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 1–20</span>
-            </div>
-            <p class="text-xs text-slate-400">Tenses, Passive Voice, Conditional, Relative Clause, Causative.</p>
-          </button>
-
-          <button onclick="selectCategory('functional')" data-cat="functional" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-bold text-white">💬 Functional & Short Text</span>
-              <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 21–26</span>
-            </div>
-            <p class="text-xs text-slate-400">Dialog ungkapan, Announcement, dan Application Letter.</p>
-          </button>
-
-          <button onclick="selectCategory('reading')" data-cat="reading" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-bold text-white">📖 Reading & Genre Teks</span>
-              <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 27–50</span>
-            </div>
-            <p class="text-xs text-slate-400">7 Teks Lengkap: Descriptive, Recount, Narrative, Exposition, dll.</p>
-          </button>
-        </div>
-      </div>
-
-      <!-- PILIH MODE GAME -->
-      <div class="max-w-2xl mx-auto mb-8 text-left">
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">2. Pilih Mode Permainan:</label>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button onclick="selectMode('zen')" data-mode="zen" class="mode-btn active-mode p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-600/20 text-left transition">
-            <div class="font-bold text-white text-sm mb-0.5">🌱 Mode Belajar (Zen)</div>
-            <p class="text-xs text-slate-300">Nyawa tak terbatas (♾️). Fokus latihan & baca pembahasan.</p>
-          </button>
-          <button onclick="selectMode('survival')" data-mode="survival" class="mode-btn p-3.5 rounded-xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
-            <div class="font-bold text-white text-sm mb-0.5">❤️ Mode Survival</div>
-            <p class="text-xs text-slate-400">Dibekali 5 Nyawa. Salah 5 kali permainan berakhir!</p>
-          </button>
-          <button onclick="selectMode('shuffle')" data-mode="shuffle" class="mode-btn p-3.5 rounded-xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
-            <div class="font-bold text-white text-sm mb-0.5">🎲 Mode Acak (Shuffle)</div>
-            <p class="text-xs text-slate-400">Urutan soal diacak supaya tidak sekadar hafal nomor.</p>
-          </button>
-        </div>
-      </div>
-
-      <button onclick="startGame()" class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-base shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5">
-        Mulai Permainan Sekarang 🚀
-      </button>
-    </section>
-
-    <!-- SCREEN 2: QUIZ GAMEPLAY -->
-    <section id="quiz-screen" class="hidden">
-      <!-- Progress Bar & Navigation Info -->
-      <div class="mb-4">
-        <div class="flex items-center justify-between text-xs text-slate-300 mb-2">
           <div class="flex items-center gap-2">
-            <span id="question-badge" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold">Soal 1 / 50</span>
-            <span id="category-badge" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium">Grammar</span>
+            <span class="font-extrabold text-base md:text-lg tracking-tight text-white">TKA English Quest</span>
+            <span class="hidden sm:inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">SMA Kelas 10–12</span>
           </div>
-          <button onclick="confirmQuit()" class="text-slate-400 hover:text-rose-400 font-semibold transition">
-            ✕ Keluar ke Menu
-          </button>
-        </div>
-        <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5">
-          <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full transition-all duration-300" style="width: 2%"></div>
+          <p class="text-[11px] text-slate-400">All-in-One Study Hub, Flashcards & 50-Question Arena</p>
         </div>
       </div>
 
-      <!-- Main Question Card -->
-      <div class="glass-card rounded-3xl p-5 md:p-8 shadow-2xl">
-        
-        <!-- Reading Passage Box (Only shown if question has a passage) -->
-        <div id="passage-container" class="hidden mb-6 bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 md:p-5 max-h-64 overflow-y-auto">
-          <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
-            <span id="passage-title" class="text-xs font-extrabold uppercase tracking-wider text-amber-400">📖 TEKS BACAAN</span>
-            <span class="text-[11px] text-slate-400">Gulir ke bawah jika teks panjang</span>
+      <!-- Navigation Tabs -->
+      <div class="flex items-center bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
+        <button onclick="switchMainTab('study')" id="nav-study" class="nav-tab-btn px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-md">
+          <span>📚</span> <span>Materi Lengkap</span>
+        </button>
+        <button onclick="switchMainTab('flashcards')" id="nav-flashcards" class="nav-tab-btn px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1.5 text-slate-300 hover:text-white">
+          <span>🃏</span> <span>Flashcards</span>
+          <span id="nav-fc-badge" class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-800 text-emerald-400">0/25</span>
+        </button>
+        <button onclick="switchMainTab('game')" id="nav-game" class="nav-tab-btn px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1.5 text-slate-300 hover:text-white">
+          <span>🎮</span> <span>Mini-Game (50 Soal)</span>
+        </button>
+      </div>
+
+      <!-- Saved Stats Pill -->
+      <div class="hidden lg:flex items-center gap-3 text-xs">
+        <div class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-1.5">
+          <span class="text-amber-400">🏆 High Score:</span>
+          <span id="global-highscore" class="font-extrabold text-white">0</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT WRAPPER -->
+  <main class="flex-1 w-full max-w-6xl mx-auto p-4 md:p-6">
+
+    <!-- ==========================================
+         TAB 1: STUDY HUB (MATERI LENGKAP KELAS 10-12)
+         ========================================== -->
+    <section id="tab-study" class="space-y-6">
+      <!-- Hero Banner -->
+      <div class="glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden border border-indigo-500/30">
+        <div class="max-w-3xl relative z-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold mb-3">
+            📖 MODUL PERSIAPAN TKA & UTBK SMA
           </div>
-          <div id="passage-content" class="text-sm text-slate-200 leading-relaxed space-y-2.5 font-normal"></div>
+          <h1 class="text-2xl md:text-4xl font-extrabold text-white mb-2 leading-tight">
+            Rangkuman Materi Bahasa Inggris SMA (Kelas 10, 11 & 12)
+          </h1>
+          <p class="text-slate-300 text-sm md:text-base leading-relaxed mb-5">
+            Pelajari seluruh konsep inti terlebih dahulu supaya kamu siap menaklukkan <strong>Flashcards</strong> dan <strong>Mini-Game 50 Soal</strong> tanpa salah jawab! Semua materi dari kelas 1 hingga kelas 3 SMA sudah dirangkum secara sistematis di bawah ini.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <button onclick="switchMainTab('flashcards')" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm shadow-lg shadow-emerald-600/25 transition">
+              🃏 Coba Tebak Flashcard (25 Kartu)
+            </button>
+            <button onclick="switchMainTab('game')" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs md:text-sm shadow-lg shadow-indigo-600/25 transition">
+              🚀 Langsung Main Kuis 50 Soal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Navigation & Search Filter for Study Material -->
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 glass-card p-4 rounded-2xl">
+        <div class="flex flex-wrap gap-2">
+          <button onclick="switchStudySubTab('all')" data-sub="all" class="study-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition">
+            🌟 Semua Materi
+          </button>
+          <button onclick="switchStudySubTab('genres')" data-sub="genres" class="study-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition">
+            📑 A. Peta 10 Jenis Teks (Genres)
+          </button>
+          <button onclick="switchStudySubTab('grammar')" data-sub="grammar" class="study-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition">
+            ⚡ B. Intisari Grammar & Rumus
+          </button>
+          <button onclick="switchStudySubTab('functional')" data-sub="functional" class="study-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition">
+            💬 C. Ungkapan & Trik Reading TKA
+          </button>
         </div>
 
-        <!-- Question Text -->
-        <div class="mb-6">
-          <h3 id="question-text" class="text-base md:text-lg font-bold text-white leading-relaxed"></h3>
+        <!-- Search Input -->
+        <div class="relative min-w-[240px]">
+          <input
+            type="text"
+            id="study-search"
+            oninput="filterStudyContent(this.value)"
+            placeholder="🔍 Cari materi (misal: Conditional, Recount)..."
+            class="w-full bg-slate-900/90 border border-slate-700 focus:border-indigo-500 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-400 outline-none"
+          />
+        </div>
+      </div>
+
+      <!-- SECTION A: PETA JENIS TEKS (GENRES OF TEXT) -->
+      <div id="study-sec-genres" class="study-block space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg md:text-xl font-extrabold text-white flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-sm">A</span>
+              Peta Jenis Teks (Genre of Texts — Kelas 10, 11 & 12)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Sekitar 70% soal TKA berbasis teks. Hafalkan Tujuan (Purpose), Struktur, dan Ciri Kebahasaannya.</p>
+          </div>
         </div>
 
-        <!-- Options List -->
-        <div id="options-container" class="space-y-3 mb-6"></div>
+        <!-- Grid 10 Genres -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="genre-cards-grid">
+          <!-- 1. Descriptive -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-sky-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">1. Descriptive Text</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300">Kelas 10</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Mendeskripsikan orang, tempat, atau benda secara spesifik (contoh: Raja Ampat, Candi Borobudur).</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-sky-300">Identification</span> (pengenalan objek) $\rightarrow$ <span class="text-sky-300">Description</span> (ciri-ciri khusus).</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> <em>Simple Present Tense</em>, banyak <em>Adjectives</em> (kata sifat: <em>breathtaking, vibrant</em>).</p>
+          </div>
 
-        <!-- Feedback & Explanation Box -->
-        <div id="feedback-box" class="hidden rounded-2xl p-4 md:p-5 mb-6 border transition-all">
-          <div class="flex items-start gap-3">
-            <div id="feedback-icon" class="text-2xl mt-0.5">✅</div>
-            <div class="flex-1">
-              <div id="feedback-title" class="font-extrabold text-sm md:text-base mb-1">Jawaban Benar!</div>
-              <p id="feedback-explanation" class="text-xs md:text-sm text-slate-200 leading-relaxed"></p>
+          <!-- 2. Recount -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-emerald-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">2. Recount Text</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Kelas 10</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Menceritakan kembali pengalaman nyata atau kejadian masa lampau secara kronologis.</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-emerald-300">Orientation</span> (siapa, di mana, kapan) $\rightarrow$ <span class="text-emerald-300">Events</span> (urutan kejadian) $\rightarrow$ <span class="text-emerald-300">Re-orientation</span> (kesan penutup).</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> Dominan <em>Simple Past Tense ($V_2$)</em>, kata hubung waktu (<em>then, after that, finally</em>).</p>
+          </div>
+
+          <!-- 3. Narrative -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-violet-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">3. Narrative Text</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300">Kelas 10</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Menghibur pembaca (<em>to amuse/entertain</em>) lewat kisah fiksi/dongeng dan memberi pesan moral.</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-violet-300">Orientation</span> $\rightarrow$ <span class="text-violet-300">Complication</span> (muncul puncak masalah/konflik) $\rightarrow$ <span class="text-violet-300">Resolution</span> $\rightarrow$ <span class="text-violet-300">Coda</span> (pesan moral).</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> <em>Past Tense</em>, <em>Action verbs</em>, kalimat langsung (<em>direct speech</em>).</p>
+          </div>
+
+          <!-- 4. Procedure -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-teal-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">4. Procedure Text</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300">Kelas 10 & 12</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Menjelaskan langkah-langkah membuat atau mengoperasikan sesuatu secara berurutan.</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-teal-300">Goal/Aim</span> $\rightarrow$ <span class="text-teal-300">Materials/Tools</span> $\rightarrow$ <span class="text-teal-300">Steps/Methods</span>.</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> <em>Imperative sentences</em> (kalimat perintah: <em>Pour, Mix, Press, Plug in</em>), <em>numbering/connectives</em>.</p>
+          </div>
+
+          <!-- 5. Analytical Exposition -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-amber-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">5. Analytical Exposition</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300">Kelas 11</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Meyakinkan pembaca bahwa suatu topik penting untuk dibahas (<em>"to persuade the reader that something is the case"</em>).</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-amber-300">Thesis</span> $\rightarrow$ <span class="text-amber-300">Arguments</span> $\rightarrow$ <span class="text-amber-300">Reiteration</span> (kesimpulan ulang <strong>tanpa</strong> saran tindakan).</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> <em>Simple Present</em>, konjungsi urutan (<em>firstly, furthermore</em>), kausalitas.</p>
+          </div>
+
+          <!-- 6. Hortatory Exposition -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-orange-500">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">6. Hortatory Exposition</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300">Kelas 11</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Meyakinkan pembaca bahwa sesuatu <strong>harus atau tidak boleh dilakukan</strong> (<em>"should/should not be the case"</em>).</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-orange-300">Thesis</span> $\rightarrow$ <span class="text-orange-300">Arguments</span> $\rightarrow$ <span class="text-orange-300">Recommendation</span> (saran tindakan di paragraf akhir).</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> Menggunakan <em>Modals</em> kuat (<strong>must, should, ought to</strong>) pada bagian <em>Recommendation</em>.</p>
+          </div>
+
+          <!-- 7. Explanation -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-cyan-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">7. Explanation Text</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300">Kelas 11</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Menjelaskan proses bagaimana dan mengapa (<em>How & Why</em>) fenomena alam, ilmiah, atau sosial terjadi.</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-cyan-300">General Statement</span> $\rightarrow$ <span class="text-cyan-300">Sequenced Explanation</span> $\rightarrow$ <span class="text-cyan-300">Closing</span>.</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> Banyak memakai <em>Passive Voice</em>, <em>Simple Present</em>, istilah teknis ilmiah.</p>
+          </div>
+
+          <!-- 8. Discussion -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-pink-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">8. Discussion Text</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300">Kelas 12</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Membahas satu isu kontroversial dari <strong>dua sudut pandang berbeda</strong> (Pro/Pendukung vs Kontra/Penentang).</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-pink-300">Issue</span> $\rightarrow$ <span class="text-pink-300">Arguments For (Proponents)</span> $\rightarrow$ <span class="text-pink-300">Arguments Against (Critics)</span> $\rightarrow$ <span class="text-pink-300">Conclusion</span>.</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> Konjungsi pertentangan (<em>on the other hand, however, nevertheless</em>).</p>
+          </div>
+
+          <!-- 9. News Item -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-rose-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">9. News Item Text</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300">Kelas 12</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Menginformasikan peristiwa aktual yang penting dan layak diberitakan (<em>newsworthy events</em>).</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-rose-300">Main Event</span> (inti berita) $\rightarrow$ <span class="text-rose-300">Background Event / Elaboration</span> $\rightarrow$ <span class="text-rose-300">Source</span> (kutipan saksi/pejabat/ahli).</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> <em>Saying verbs</em> (<em>announced, said, stated</em>), nama lokasi di awal teks.</p>
+          </div>
+
+          <!-- 10. Review -->
+          <div class="searchable-card glass-card p-5 rounded-2xl border-l-4 border-l-indigo-400">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-extrabold text-base text-white">10. Review Text</span>
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">Kelas 12</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-2"><strong>🎯 Tujuan (Purpose):</strong> Mengevaluasi, mengulas, atau mengkritisi karya seni/produk (film, buku, album lagu).</p>
+            <p class="text-xs text-slate-300 mb-2"><strong>🧱 Struktur:</strong> <span class="text-indigo-300">Orientation</span> $\rightarrow$ <span class="text-indigo-300">Interpretative Recount</span> $\rightarrow$ <span class="text-indigo-300">Evaluation</span> $\rightarrow$ <span class="text-indigo-300">Evaluative Summation</span>.</p>
+            <p class="text-xs text-slate-400"><strong>🔤 Ciri Bahasa:</strong> Kata sifat penilaian (<em>masterpiece, fascinating, disappointing</em>).</p>
+          </div>
+        </div>
+
+        <!-- Short Functional Texts Box -->
+        <div class="searchable-card glass-card p-5 rounded-2xl border border-slate-700">
+          <h3 class="font-extrabold text-sm md:text-base text-amber-300 mb-2">📌 Teks Fungsional Pendek (Short Functional Texts Kelas 10–12)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
+            <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800">
+              <div class="font-bold text-white mb-1">Kelas 10: Announcement & Memo</div>
+              <p>Menginformasikan jadwal/aturan resmi kepada publik/siswa. Perhatikan <em>To (penerima)</em>, <em>Purpose</em>, dan <em>Consequence</em> jika melanggar.</p>
+            </div>
+            <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800">
+              <div class="font-bold text-white mb-1">Kelas 11: Invitation & Personal Letter</div>
+              <p>Undangan resmi (<em>Formal Invitation</em>) menggunakan bahasa baku dan mencantumkan <strong>RSVP</strong> (konfirmasi kehadiran).</p>
+            </div>
+            <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800">
+              <div class="font-bold text-white mb-1">Kelas 12: Application Letter & Caption</div>
+              <p>Surat Lamaran Kerja: <em>Opening</em> (posisi yang dilamar), <em>Body</em> (kualifikasi & pengalaman), <em>Closing</em> (lampiran CV & harapan wawancara).</p>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Bottom Action Buttons -->
-        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
-          <button id="prev-btn" onclick="prevQuestion()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs md:text-sm font-semibold transition disabled:opacity-40 disabled:pointer-events-none">
-            ← Soal Sebelumnya
-          </button>
-
-          <button id="next-btn" onclick="nextQuestion()" class="hidden px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-bold shadow-lg shadow-indigo-600/30 transition">
-            Soal Berikutnya →
-          </button>
+      <!-- SECTION B: INTISARI GRAMMAR & STRUCTURE -->
+      <div id="study-sec-grammar" class="study-block space-y-4 pt-2">
+        <div>
+          <h2 class="text-lg md:text-xl font-extrabold text-white flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 flex items-center justify-center text-sm">B</span>
+            Intisari Tata Bahasa (Grammar & Structure)
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Rumus cepat untuk menjawab soal nomor 1–20 tanpa terjebak pengecoh.</p>
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 1. Sistem Tenses Utama -->
+          <div class="searchable-card glass-card p-5 rounded-2xl">
+            <h3 class="font-extrabold text-base text-indigo-300 mb-3">1. Sistem Tenses & Kunci Waktu</h3>
+            <ul class="space-y-2 text-xs text-slate-200 leading-relaxed">
+              <li>• <strong>Prediksi Bukti Fisik:</strong> <em>Look at the dark clouds!</em> $\rightarrow$ gunakan <strong>be going to + V1</strong> (<em>is going to rain</em>).</li>
+              <li>• <strong>Present Perfect:</strong> $S + \text{have/has} + V_3$ (atau $\text{been} + V_{\text{ing}}$). Ingat: <strong>FOR</strong> + durasi waktu (<em>for two hours</em>), <strong>SINCE</strong> + titik awal waktu (<em>since 8 o'clock</em>).</li>
+              <li>• <strong>Past Continuous (Kejadian dipotong di masa lalu):</strong><br>
+                <span class="text-emerald-300 font-semibold">While + Past Continuous ($\text{was/were} + V_{\text{ing}}$), Simple Past ($V_2$)</span><br>
+                <span class="text-emerald-300 font-semibold">Past Continuous + When + Simple Past ($V_2$)</span></li>
+              <li>• <strong>Past Perfect (Selesai lebih dulu di masa lalu):</strong><br>
+                Penanda: <em>By the time / Before + Simple Past ($V_2$)</em> $\rightarrow$ pasangannya wajib <strong>$\text{had} + V_3$</strong>.</li>
+              <li>• <strong>Future Perfect (Akan sudah selesai di masa depan):</strong><br>
+                Penanda: <strong>By + waktu masa depan</strong> (<em>By the end of this year</em>) $\rightarrow$ wajib <strong>$\text{will have} + V_3$</strong>.</li>
+            </ul>
+          </div>
+
+          <!-- 2. Passive Voice -->
+          <div class="searchable-card glass-card p-5 rounded-2xl">
+            <h3 class="font-extrabold text-base text-emerald-300 mb-3">2. Passive Voice (Kalimat Pasif: $\text{Be} + V_3$)</h3>
+            <p class="text-xs text-slate-300 mb-2">Jika subjek adalah benda yang dikenai pekerjaan, ubah ke bentuk pasif:</p>
+            <div class="space-y-1.5 text-xs bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+              <p>🔹 <strong>Simple Present:</strong> $\text{is / am / are} + V_3$</p>
+              <p>🔹 <strong>Present / Past Continuous (right now):</strong> <span class="text-emerald-300 font-bold">$\text{is/am/are/was/were} + \text{being} + V_3$</span> (contoh: <em>is being built</em>)</p>
+              <p>🔹 <strong>Simple Past:</strong> $\text{was / were} + V_3$</p>
+              <p>🔹 <strong>Perfect Tense:</strong> $\text{have / has / had} + \text{been} + V_3$</p>
+              <p>🔹 <strong>Setelah Modals (must, can, will, should):</strong> <span class="text-amber-300 font-bold">$\text{Modal} + \text{be} + V_3$</span> (contoh: <em>must be followed</em>)</p>
+            </div>
+          </div>
+
+          <!-- 3. Conditional Sentences & Inversi -->
+          <div class="searchable-card glass-card p-5 rounded-2xl">
+            <h3 class="font-extrabold text-base text-amber-300 mb-3">3. Conditional Sentences & Inversi (Tanpa "If")</h3>
+            <div class="space-y-2.5 text-xs text-slate-200">
+              <div class="p-2.5 rounded-xl bg-slate-900/75 border border-slate-800">
+                <strong class="text-white">Type 1 (Mungkin terjadi):</strong> $\text{If} + V_1 \rightarrow \text{will/can} + V_1$<br>
+                <span class="text-slate-400">Inversi: <strong>Should</strong> + $S + V_1$</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/75 border border-slate-800">
+                <strong class="text-amber-300">Type 2 (Tidak nyata sekarang / Present Unreal):</strong><br>
+                Rumus: <strong>$\text{If} + V_2 (\text{had/were}) \rightarrow \text{would/could} + V_1$</strong><br>
+                Fakta: Dalam <em>Simple Present</em> & berlawanan sifat. Inversi: <strong>Were + $S$ ...</strong>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/75 border border-slate-800">
+                <strong class="text-rose-300">Type 3 (Penyesalan masa lalu / Past Unreal):</strong><br>
+                Rumus: <strong>$\text{If} + \text{had } V_3 \rightarrow \text{would/could have} + V_3$</strong><br>
+                Fakta: Dalam <strong>Simple Past ($V_2$)</strong> & berlawanan (Positif $\leftrightarrow$ Negatif).<br>
+                Inversi: <strong>Had + $S + V_3$</strong> (contoh: <em>"Had I known..."</em> = <em>"If I had known..."</em>).
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Relative Clauses & Conjunctions -->
+          <div class="searchable-card glass-card p-5 rounded-2xl">
+            <h3 class="font-extrabold text-base text-violet-300 mb-3">4. Relative Clauses & Conjunctions</h3>
+            <ul class="space-y-2 text-xs text-slate-200 leading-relaxed">
+              <li>• <strong>WHO</strong> + Verb (Subjek orang) | <strong>WHOM</strong> + Subjek + Verb (Objek orang: <em>The candidates whom the committee interviewed</em>).</li>
+              <li>• <strong>WHOSE</strong> + Noun (Kepemilikan: <em>The scientist whose research won...</em>).</li>
+              <li>• <strong>Pertentangan (Contrast):</strong><br>
+                - Diikuti Kalimat ($S+V$): <em>Although, Even though, Though</em>.<br>
+                - Diikuti Frasa Benda (<em>Noun Phrase</em>): <strong>Despite / In spite of</strong> (Contoh: <em>Despite the heavy rain...</em> — jangan pakai <em>of</em> setelah <em>despite</em>!).</li>
+              <li>• <strong>Sebab-Akibat (Cause-Effect):</strong><br>
+                - Diikuti Kalimat ($S+V$): <em>Because, Since, As</em>.<br>
+                - Diikuti Frasa Benda (<em>Noun Phrase</em>): <strong>due to / because of / owing to</strong> (Contoh: <em>...due to the thick fog</em>).</li>
+            </ul>
+          </div>
+
+          <!-- 5. Causative, Reported Speech, S-V Agreement -->
+          <div class="searchable-card glass-card p-5 rounded-2xl md:col-span-2">
+            <h3 class="font-extrabold text-base text-cyan-300 mb-3">5. Causative Verbs, Agreement, Reported Speech & Gerund</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-200">
+              <div class="bg-slate-900/75 p-3.5 rounded-xl border border-slate-800">
+                <div class="font-bold text-cyan-300 mb-1">🛠️ Causative Verbs (Menyuruh)</div>
+                <p class="mb-1">• <strong>Aktif (Objek Orang):</strong><br>$\text{Have/Make} + \text{Orang} + \mathbf{V_1}$ (<em>had the technician <strong>fix</strong></em>)<br>$\text{Get} + \text{Orang} + \mathbf{\text{to } V_1}$</p>
+                <p>• <strong>Pasif (Objek Benda):</strong><br>$\text{Have/Get} + \text{Benda} + \mathbf{V_3}$ (<em>got her picture <strong>taken</strong></em>)</p>
+              </div>
+              <div class="bg-slate-900/75 p-3.5 rounded-xl border border-slate-800">
+                <div class="font-bold text-amber-300 mb-1">🗣️ Reported Speech & Agreement</div>
+                <p class="mb-1">• <strong>Neither... nor... / Either... or...:</strong> Verb mengikuti subjek <strong>terdekat/belakang</strong> (<em>Neither the manager nor the employees <strong>were</strong>...</em>).</p>
+                <p>• <strong>Indirect Speech:</strong> Jika pengantar <em>said</em>, maka $V_2$ (<em>submitted</em>) mundur jadi <strong>$\text{had } V_3$</strong> (<em>had submitted</em>), <em>yesterday</em> $\rightarrow$ <em>the day before</em>.</p>
+              </div>
+              <div class="bg-slate-900/75 p-3.5 rounded-xl border border-slate-800">
+                <div class="font-bold text-emerald-300 mb-1">💡 Modals & Gerund ($V_{\text{ing}}$)</div>
+                <p class="mb-1">• <strong>Had better + $V_1$:</strong> Saran kuat/mendesak (<em>You had better take a rest</em>).</p>
+                <p>• <strong>Kata Kerja + Gerund ($V_{\text{ing}}$):</strong> Kata <em>postpone, avoid, consider, finish, mind</em> wajib diikuti <strong>$V_{\text{ing}}$</strong> (<em>postpone <strong>launching</strong></em>).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION C: FUNCTIONAL EXPRESSIONS & TRIK READING -->
+      <div id="study-sec-functional" class="study-block space-y-4 pt-2">
+        <div>
+          <h2 class="text-lg md:text-xl font-extrabold text-white flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center justify-center text-sm">C</span>
+            Ungkapan Fungsional & Strategi Reading TKA
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="searchable-card glass-card p-5 rounded-2xl">
+            <h3 class="font-extrabold text-base text-emerald-300 mb-3">💬 Functional Expressions (Kelas 10–12)</h3>
+            <ul class="space-y-2 text-xs text-slate-200 leading-relaxed">
+              <li>• <strong>Congratulating:</strong> <em>"Congratulations, I'm so proud of you!"</em> (saat seseorang lulus seleksi/meraih prestasi).</li>
+              <li>• <strong>Giving Suggestions:</strong><br>
+                - Diikuti <strong>$V_{\text{ing}}$</strong>: <strong>How about / What about + $V_{\text{ing}}$?</strong> (<em>"How about holding a brief evaluation?"</em>)<br>
+                - Diikuti <strong>$V_1$ murni</strong>: <em>Why don't we + $V_1$</em> / <em>Let's + $V_1$</em>.</li>
+              <li>• <strong>Polite Disagreement (Tidak setuju secara sopan):</strong><br>
+                <em>"I'm afraid I have to disagree with you."</em> (Hati-hati: <em>"I couldn't agree more"</em> artinya <strong>Sangat Setuju</strong>!).</li>
+            </ul>
+          </div>
+
+          <div class="searchable-card glass-card p-5 rounded-2xl">
+            <h3 class="font-extrabold text-base text-amber-300 mb-3">🎯 Kamus Kilat & Trik Reading TKA</h3>
+            <ul class="space-y-2 text-xs text-slate-200 leading-relaxed">
+              <li>• <strong>Author's Tone:</strong> Sikap penulis terhadap topik. Jika membahas krisis kesehatan/lingkungan dan mendesak solusi $\rightarrow$ <strong>Urgent and concerned</strong>.</li>
+              <li>• <strong>Kosakata Langganan Kuis:</strong><br>
+                - <em>Breathtaking</em> = <strong>Magnificent</strong> (Sangat memukau)<br>
+                - <em>Shoddy</em> = <strong>Poor-quality</strong> (Kualitas buruk/asal-asalan)<br>
+                - <em>Retain</em> = <strong>Keep / Hold</strong> (Menahan/menyimpan)<br>
+                - <em>Proponents</em> = <strong>Supporters / Advocates</strong> (Pendukung)<br>
+                - <em>Deployed</em> = <strong>Put into use / Implemented</strong> (Diterapkan/diterjunkan)</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- SCREEN 3: RESULT & REVIEW -->
-    <section id="result-screen" class="hidden glass-card rounded-3xl p-6 md:p-10 text-center shadow-2xl">
-      <div id="result-emoji" class="text-6xl mb-3">🏆</div>
-      <h2 id="result-title" class="text-2xl md:text-3xl font-extrabold text-white mb-2">Misi Selesai!</h2>
-      <p id="result-subtitle" class="text-slate-300 text-sm mb-8">Berikut adalah evaluasi kemampuan Bahasa Inggris TKA kamu:</p>
+    <!-- ==========================================
+         TAB 2: INTERACTIVE FLASHCARDS (25 KARTU)
+         ========================================== -->
+    <section id="tab-flashcards" class="hidden space-y-6">
+      <!-- Header & Progress Flashcard -->
+      <div class="glass-card rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold mb-2">
+            🃏 MODE LATIHAN RINGAN (ACTIVE RECALL)
+          </div>
+          <h2 class="text-xl md:text-2xl font-extrabold text-white">Flashcard Tebak Konsep & Rumus TKA</h2>
+          <p class="text-xs md:text-sm text-slate-300">Klik kartu (atau tekan tombol <strong>Spasi</strong>) untuk membalik kartu dan melihat jawaban.</p>
+        </div>
 
-      <!-- Score Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto mb-8">
-        <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
-          <div class="text-xs text-slate-400 mb-1">Total Skor</div>
-          <div id="final-score" class="text-2xl font-extrabold text-indigo-400">0</div>
-        </div>
-        <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
-          <div class="text-xs text-slate-400 mb-1">Akurasi</div>
-          <div id="final-accuracy" class="text-2xl font-extrabold text-emerald-400">0%</div>
-        </div>
-        <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
-          <div class="text-xs text-slate-400 mb-1">Benar / Total</div>
-          <div id="final-correct" class="text-2xl font-extrabold text-white">0/50</div>
-        </div>
-        <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
-          <div class="text-xs text-slate-400 mb-1">Max Combo 🔥</div>
-          <div id="final-streak" class="text-2xl font-extrabold text-amber-400">0</div>
+        <!-- Mastery Progress Counter -->
+        <div class="flex items-center gap-3 self-stretch md:self-auto bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
+          <div class="text-right">
+            <div class="text-[11px] text-slate-400">Kartu Dikuasai</div>
+            <div id="fc-mastery-text" class="text-lg font-extrabold text-emerald-400">0 / 25 Paham</div>
+          </div>
+          <button onclick="resetFlashcardMastery()" title="Reset Progres Flashcard" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition">
+            🔄 Reset
+          </button>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
-        <button onclick="restartSameSettings()" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition">
-          🔄 Main Lagi
-        </button>
-        <button id="retry-wrong-btn" onclick="retryWrongQuestions()" class="hidden px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/20 transition">
-          🎯 Latih Soal yang Salah Saja
-        </button>
-        <button onclick="backToMenu()" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
-          🏠 Menu Utama
+      <!-- Filter Kategori Flashcard -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap gap-2" id="fc-filter-bar">
+          <button onclick="filterFlashcards('all')" data-fccat="all" class="fc-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition">
+            Semua (25)
+          </button>
+          <button onclick="filterFlashcards('genre')" data-fccat="genre" class="fc-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition">
+            📑 Genre Teks
+          </button>
+          <button onclick="filterFlashcards('grammar')" data-fccat="grammar" class="fc-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition">
+            ⚡ Tenses & Conditional
+          </button>
+          <button onclick="filterFlashcards('structure')" data-fccat="structure" class="fc-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition">
+            🔗 Clause, Conjunction & Causative
+          </button>
+          <button onclick="filterFlashcards('unmastered')" data-fccat="unmastered" class="fc-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 transition">
+            🎯 Belum Hafal Saja
+          </button>
+        </div>
+
+        <button onclick="shuffleFlashcards()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5">
+          🔀 Acak Urutan Kartu
         </button>
       </div>
 
-      <!-- Review List -->
-      <div class="text-left max-w-3xl mx-auto">
-        <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-3">📋 Rincian Jawaban & Pembahasan:</h3>
-        <div id="review-list" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
+      <!-- 3D FLIP CARD ARENA -->
+      <div class="max-w-2xl mx-auto">
+        <!-- Card Counter & Status -->
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-2 px-1">
+          <span id="fc-counter-badge" class="font-bold text-indigo-300">Kartu 1 dari 25</span>
+          <span id="fc-status-pill" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-semibold">Belum Ditandai</span>
+        </div>
+
+        <!-- The 3D Card Container -->
+        <div id="fc-card-wrapper" onclick="toggleFlipCard()" class="perspective-1000 w-full h-80 sm:h-96 cursor-pointer select-none mb-5">
+          <div class="flip-card-inner w-full h-full">
+            
+            <!-- FRONT OF CARD (QUESTION) -->
+            <div class="flip-card-front glass-card p-6 md:p-10 flex flex-col justify-between border-2 border-indigo-500/40 shadow-2xl">
+              <div class="flex items-center justify-between">
+                <span id="fc-front-cat" class="text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  KONSEP INTI
+                </span>
+                <span class="text-xs text-slate-400">Klik untuk balik kartu 👆</span>
+              </div>
+
+              <div class="my-auto text-center px-2">
+                <p class="text-xs uppercase tracking-widest text-slate-400 mb-2 font-bold">TEBAK JAWABAN / RUMUSNYA:</p>
+                <h3 id="fc-front-text" class="text-lg md:text-2xl font-extrabold text-white leading-snug"></h3>
+                
+                <!-- Hint Box -->
+                <div id="fc-hint-box" class="hidden mt-4 inline-block px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs">
+                  💡 <strong>Hint:</strong> <span id="fc-hint-text"></span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-3 border-t border-slate-800/80">
+                <button onclick="event.stopPropagation(); showFcHint();" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold transition">
+                  💡 Tampilkan Hint
+                </button>
+                <span class="text-[11px] text-slate-400">Tekan [Spasi] untuk membalik</span>
+              </div>
+            </div>
+
+            <!-- BACK OF CARD (ANSWER) -->
+            <div class="flip-card-back glass-card p-6 md:p-10 flex flex-col justify-between border-2 border-emerald-500/50 bg-slate-900/95 shadow-2xl">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  ✅ KUNCI JAWABAN & RUMUS
+                </span>
+                <span class="text-xs text-slate-400">Klik untuk kembali</span>
+              </div>
+
+              <div class="my-auto text-center px-2">
+                <p id="fc-back-text" class="text-base md:text-xl font-bold text-emerald-300 leading-relaxed"></p>
+              </div>
+
+              <!-- Self Evaluation Buttons -->
+              <div onclick="event.stopPropagation();" class="flex items-center justify-center gap-3 pt-3 border-t border-slate-800">
+                <button onclick="markFlashcard(false)" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-bold text-xs transition">
+                  🔄 Belum Hafal (Ulangi Nanti)
+                </button>
+                <button onclick="markFlashcard(true)" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition">
+                  ✅ Sudah Paham!
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="flex items-center justify-between gap-4">
+          <button onclick="prevFlashcard()" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs md:text-sm transition">
+            ← Kartu Sebelumnya
+          </button>
+          <button onclick="toggleFlipCard()" class="px-6 py-3 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 hover:bg-indigo-600/40 text-indigo-200 font-bold text-xs md:text-sm transition">
+            🔄 Balik Kartu
+          </button>
+          <button onclick="nextFlashcard()" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs md:text-sm transition">
+            Kartu Berikutnya →
+          </button>
+        </div>
       </div>
     </section>
 
+    <!-- ==========================================
+         TAB 3: MINI-GAME KUIS 50 SOAL (TKA QUEST)
+         ========================================== -->
+    <section id="tab-game" class="hidden">
+
+      <!-- GAME HUD BAR (Only visible during active quiz) -->
+      <div id="hud-stats" class="hidden flex flex-wrap items-center justify-between gap-3 mb-5 glass-card p-3.5 rounded-2xl border border-indigo-500/30">
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700" title="Status Nyawa">
+            <span id="lives-display" class="text-xs md:text-sm tracking-widest font-bold text-emerald-300">♾️ Mode Zen</span>
+          </div>
+          <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl">
+            <span class="text-amber-400 text-xs md:text-sm">🔥 Streak:</span>
+            <span id="streak-display" class="font-extrabold text-amber-300 text-xs md:text-sm">0</span>
+          </div>
+          <div class="flex items-center gap-1.5 bg-indigo-500/15 border border-indigo-500/30 px-3.5 py-1.5 rounded-xl">
+            <span class="text-indigo-300 text-xs md:text-sm">⭐ Skor:</span>
+            <span id="score-display" class="font-extrabold text-white text-xs md:text-sm">0</span>
+          </div>
+        </div>
+
+        <!-- Quick Helpers During Quiz -->
+        <div class="flex items-center gap-2">
+          <button id="lifeline-5050-btn" onclick="useFiftyFifty()" class="px-3 py-1.5 rounded-xl bg-violet-600/30 hover:bg-violet-600/50 border border-violet-400/40 text-violet-200 text-xs font-bold transition flex items-center gap-1 disabled:opacity-40 disabled:pointer-events-none">
+            <span>⚡ Bantuan 50:50</span>
+            <span id="lifeline-count" class="px-1.5 py-0.2 bg-violet-500 text-white rounded text-[10px]">3</span>
+          </button>
+          <button onclick="toggleCheatSheetModal(true)" class="px-3 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 border border-emerald-400/40 text-emerald-200 text-xs font-bold transition">
+            📖 Intip Rangkuman Materi
+          </button>
+        </div>
+      </div>
+
+      <!-- SCREEN 1: START MENU -->
+      <div id="start-screen" class="glass-card rounded-3xl p-6 md:p-10 text-center shadow-2xl">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-4">
+          🎮 ARENA UJI KEMAMPUAN TKA & UTBK SMA
+        </div>
+        <h2 class="text-2xl md:text-4xl font-extrabold text-white mb-3">Siap Taklukkan 50 Soal Bahasa Inggris?</h2>
+        <p class="text-slate-300 text-sm md:text-base max-w-xl mx-auto mb-6 leading-relaxed">
+          Sudah selesai baca rangkuman di <strong>Materi Lengkap</strong> dan pemanasan di <strong>Flashcards</strong>? Sekarang uji skormu! Dilengkapi fitur <em>Bantuan 50:50</em> dan tombol <em>Intip Materi</em> jika kamu lupa rumus di tengah jalan.
+        </p>
+
+        <!-- PILIH KATEGORI -->
+        <div class="max-w-2xl mx-auto mb-7 text-left">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">1. Pilih Misi Kategori Soal:</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="category-selector">
+            <button onclick="selectCategory('all')" data-cat="all" class="cat-btn active-cat p-4 rounded-2xl border-2 border-indigo-500 bg-indigo-600/20 text-left transition">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-white">🏆 Semua Soal (Full Marathon)</span>
+                <span class="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-md font-bold">50 Soal</span>
+              </div>
+              <p class="text-xs text-slate-300">Gabungan lengkap Grammar, Expressions, dan Reading TKA.</p>
+            </button>
+
+            <button onclick="selectCategory('grammar')" data-cat="grammar" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-white">⚡ Grammar & Structure</span>
+                <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 1–20</span>
+              </div>
+              <p class="text-xs text-slate-400">Tenses, Passive Voice, Conditional, Relative Clause, Causative.</p>
+            </button>
+
+            <button onclick="selectCategory('functional')" data-cat="functional" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-white">💬 Functional & Short Text</span>
+                <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 21–26</span>
+              </div>
+              <p class="text-xs text-slate-400">Dialog ungkapan, Announcement, dan Application Letter.</p>
+            </button>
+
+            <button onclick="selectCategory('reading')" data-cat="reading" class="cat-btn p-4 rounded-2xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-white">📖 Reading & Genre Teks</span>
+                <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded-md font-bold">Soal 27–50</span>
+              </div>
+              <p class="text-xs text-slate-400">7 Teks Lengkap: Descriptive, Recount, Narrative, Exposition, dll.</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- PILIH MODE GAME -->
+        <div class="max-w-2xl mx-auto mb-8 text-left">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">2. Pilih Mode Permainan:</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button onclick="selectMode('zen')" data-mode="zen" class="mode-btn active-mode p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-600/20 text-left transition">
+              <div class="font-bold text-white text-sm mb-0.5">🌱 Mode Belajar (Zen)</div>
+              <p class="text-xs text-slate-300">Nyawa tak terbatas (♾️). Fokus latihan & baca pembahasan.</p>
+            </button>
+            <button onclick="selectMode('survival')" data-mode="survival" class="mode-btn p-3.5 rounded-xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+              <div class="font-bold text-white text-sm mb-0.5">❤️ Mode Survival</div>
+              <p class="text-xs text-slate-400">Dibekali 5 Nyawa. Salah 5 kali permainan berakhir!</p>
+            </button>
+            <button onclick="selectMode('shuffle')" data-mode="shuffle" class="mode-btn p-3.5 rounded-xl border-2 border-slate-700 bg-slate-800/40 text-left transition hover:border-slate-500">
+              <div class="font-bold text-white text-sm mb-0.5">🎲 Mode Acak (Shuffle)</div>
+              <p class="text-xs text-slate-400">Urutan soal diacak supaya tidak sekadar hafal nomor.</p>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button onclick="startGame()" class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-base shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5">
+            Mulai Permainan Sekarang 🚀
+          </button>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: QUIZ GAMEPLAY -->
+      <div id="quiz-screen" class="hidden">
+        <!-- Progress Bar & Navigation Info -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between text-xs text-slate-300 mb-2">
+            <div class="flex items-center gap-2">
+              <span id="question-badge" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold">Soal 1 / 50</span>
+              <span id="category-badge" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-medium">Grammar</span>
+            </div>
+            <button onclick="openQuitModal()" class="text-slate-400 hover:text-rose-400 font-semibold transition">
+              ✕ Keluar ke Menu Kuis
+            </button>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full transition-all duration-300" style="width: 2%"></div>
+          </div>
+        </div>
+
+        <!-- Main Question Card -->
+        <div class="glass-card rounded-3xl p-5 md:p-8 shadow-2xl">
+          
+          <!-- Reading Passage Box (Only shown if question has a passage) -->
+          <div id="passage-container" class="hidden mb-6 bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 md:p-5 max-h-64 overflow-y-auto">
+            <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
+              <span id="passage-title" class="text-xs font-extrabold uppercase tracking-wider text-amber-400">📖 TEKS BACAAN</span>
+              <span class="text-[11px] text-slate-400">Gulir ke bawah jika teks panjang</span>
+            </div>
+            <div id="passage-content" class="text-sm text-slate-200 leading-relaxed space-y-2.5 font-normal"></div>
+          </div>
+
+          <!-- Question Text -->
+          <div class="mb-6">
+            <h3 id="question-text" class="text-base md:text-lg font-bold text-white leading-relaxed"></h3>
+          </div>
+
+          <!-- Options List -->
+          <div id="options-container" class="space-y-3 mb-6"></div>
+
+          <!-- Feedback & Explanation Box -->
+          <div id="feedback-box" class="hidden rounded-2xl p-4 md:p-5 mb-6 border transition-all">
+            <div class="flex items-start gap-3">
+              <div id="feedback-icon" class="text-2xl mt-0.5">✅</div>
+              <div class="flex-1">
+                <div id="feedback-title" class="font-extrabold text-sm md:text-base mb-1">Jawaban Benar!</div>
+                <p id="feedback-explanation" class="text-xs md:text-sm text-slate-200 leading-relaxed"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+            <button id="prev-btn" onclick="prevQuestion()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs md:text-sm font-semibold transition disabled:opacity-40 disabled:pointer-events-none">
+              ← Soal Sebelumnya
+            </button>
+
+            <button id="next-btn" onclick="nextQuestion()" class="hidden px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-bold shadow-lg shadow-indigo-600/30 transition">
+              Soal Berikutnya →
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SCREEN 3: RESULT & REVIEW -->
+      <div id="result-screen" class="hidden glass-card rounded-3xl p-6 md:p-10 text-center shadow-2xl">
+        <div id="result-emoji" class="text-6xl mb-3">🏆</div>
+        <h2 id="result-title" class="text-2xl md:text-3xl font-extrabold text-white mb-2">Misi Selesai!</h2>
+        <p id="result-subtitle" class="text-slate-300 text-sm mb-8">Berikut adalah evaluasi kemampuan Bahasa Inggris TKA kamu:</p>
+
+        <!-- Score Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto mb-8">
+          <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
+            <div class="text-xs text-slate-400 mb-1">Total Skor</div>
+            <div id="final-score" class="text-2xl font-extrabold text-indigo-400">0</div>
+          </div>
+          <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
+            <div class="text-xs text-slate-400 mb-1">Akurasi</div>
+            <div id="final-accuracy" class="text-2xl font-extrabold text-emerald-400">0%</div>
+          </div>
+          <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
+            <div class="text-xs text-slate-400 mb-1">Benar / Total</div>
+            <div id="final-correct" class="text-2xl font-extrabold text-white">0/50</div>
+          </div>
+          <div class="bg-slate-900/80 border border-slate-700 p-4 rounded-2xl">
+            <div class="text-xs text-slate-400 mb-1">Max Combo 🔥</div>
+            <div id="final-streak" class="text-2xl font-extrabold text-amber-400">0</div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+          <button onclick="restartSameSettings()" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition">
+            🔄 Main Lagi
+          </button>
+          <button id="retry-wrong-btn" class="hidden px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/20 transition">
+            🎯 Latih Soal yang Salah Saja
+          </button>
+          <button onclick="backToMenu()" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+            🏠 Menu Kuis
+          </button>
+          <button onclick="switchMainTab('study')" class="px-6 py-3 rounded-xl bg-emerald-600/20 border border-emerald-500/40 hover:bg-emerald-600/30 text-emerald-300 font-bold text-sm transition">
+            📚 Pelajari Ulang Materi
+          </button>
+        </div>
+
+        <!-- Review List -->
+        <div class="text-left max-w-3xl mx-auto">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-3">📋 Rincian Jawaban & Pembahasan Lengkap:</h3>
+          <div id="review-list" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: CONTEKAN MATERI KILAT SAAT MAIN KUIS -->
+  <div id="cheatsheet-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-3xl rounded-3xl p-6 md:p-8 border border-indigo-500/40 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📖</span>
+          <h3 class="font-extrabold text-lg text-white">Contekan Rumus & Materi Cepat (Cheat Sheet)</h3>
+        </div>
+        <button onclick="toggleCheatSheetModal(false)" class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">
+          ✕ Tutup
+        </button>
+      </div>
+
+      <div class="overflow-y-auto py-4 space-y-4 text-xs text-slate-200 leading-relaxed pr-2">
+        <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+          <div class="font-bold text-indigo-300 mb-1">⚡ Rumus Cepat Tenses & Passive Voice</div>
+          <p>• <strong>Bukti fisik sekarang</strong> (<em>dark clouds</em>) $\rightarrow$ <em>is/am/are going to + V1</em>.</p>
+          <p>• <strong>While</strong> + Past Continuous (<em>was/were V-ing</em>), Simple Past (<em>V2</em>).</p>
+          <p>• <strong>By the time + V2</strong> $\rightarrow$ Past Perfect (<em>had + V3</em>). | <strong>By + waktu depan</strong> $\rightarrow$ Future Perfect (<em>will have + V3</em>).</p>
+          <p>• <strong>Pasif Continuous (right now):</strong> <em>is/am/are + being + V3</em>. | <strong>Pasif Modal:</strong> <em>must/can/will + be + V3</em>.</p>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+          <div class="font-bold text-amber-300 mb-1">🔁 Conditional, Inversi, Relative Clause & Causative</div>
+          <p>• <strong>Conditional Type 2:</strong> <em>If + V2 (had/were), would + V1</em>. | <strong>Type 3:</strong> <em>If + had V3, would have + V3</em> (Faktanya berlawanan dalam Simple Past). Inversi Type 3: <strong>Had + S + V3</strong>.</p>
+          <p>• <strong>Relative:</strong> <em>Who</em> + Verb | <em>Whom</em> + S + Verb | <em>Whose</em> + Noun (Kepemilikan).</p>
+          <p>• <strong>Conjunction + Noun Phrase (tanpa kata kerja):</strong> <em>Despite / In spite of</em> (pertentangan) & <em>due to / because of</em> (sebab-akibat).</p>
+          <p>• <strong>Causative:</strong> Aktif Orang = <em>had + orang + V1 murni</em> (fix). Pasif Benda = <em>got + benda + V3</em> (taken).</p>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+          <div class="font-bold text-emerald-300 mb-1">📑 Ciri 10 Jenis Teks (Genre)</div>
+          <p>• <strong>Descriptive:</strong> Deskripsi tempat spesifik (Raja Ampat). | <strong>Recount:</strong> Pengalaman masa lalu (Simple Past). | <strong>Narrative:</strong> Cerita dengan pesan moral.</p>
+          <p>• <strong>Hortatory Exposition:</strong> Diakhiri <em>Recommendation (must/should)</em>. | <strong>Explanation:</strong> Proses terjadinya fenomena (Urban Heat Island).</p>
+          <p>• <strong>Discussion:</strong> Pro (<em>Proponents</em>) vs Kontra (<em>Critics</em>). | <strong>News Item:</strong> Berita aktual + kutipan narasumber (<em>Source</em>).</p>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 text-right">
+        <button onclick="toggleCheatSheetModal(false)" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
+          Kembali ke Soal 🚀
+        </button>
+      </div>
+    </div>
   </div>
 
+  <!-- MODAL 2: KONFIRMASI KELUAR KUIS (Tanpa alert/confirm bawaan browser) -->
+  <div id="quit-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 text-center border border-rose-500/30 shadow-2xl">
+      <div class="text-4xl mb-3">⚠️</div>
+      <h3 class="text-lg font-extrabold text-white mb-2">Keluar ke Menu Kuis?</h3>
+      <p class="text-xs text-slate-300 mb-6">Progres kuis yang sedang berjalan saat ini akan direset.</p>
+      <div class="flex items-center justify-center gap-3">
+        <button onclick="closeQuitModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
+          Batal, Lanjut Main
+        </button>
+        <button onclick="confirmQuitGame()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs">
+          Ya, Keluar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="text-center py-5 text-xs text-slate-500 border-t border-slate-900 mt-10">
+    TKA English Quest — Rangkuman Materi SMA Kelas 10–12, Flashcards & Mini-Game 50 Soal Interaktif
+  </footer>
+
   <script>
-    // Kumpulan Teks Bacaan (Passages)
+    /* ==========================================================
+       DATA 25 FLASHCARDS KONSEP INTI & RUMUS CEPAT
+       ========================================================== */
+    const FLASHCARDS_DATA = [
+      { id: 1, cat: 'genre', catLabel: 'Genre of Texts', front: 'Apa tujuan dan struktur utama dari Analytical Exposition Text?', back: 'Meyakinkan pembaca bahwa suatu topik penting untuk dibahas ("that something is the case").\nStruktur: Thesis → Arguments → Reiteration (Kesimpulan ulang tanpa saran).', hint: 'Menganalisis pentingnya isu dan ditutup dengan kesimpulan ulang.' },
+      { id: 2, cat: 'genre', catLabel: 'Genre of Texts', front: 'Apa perbedaan utama Hortatory Exposition dan Analytical Exposition pada paragraf terakhir?', back: 'Hortatory Exposition diakhiri dengan Recommendation (saran apa yang harus/tidak boleh dilakukan menggunakan modal must/should), sedangkan Analytical diakhiri Reiteration.', hint: 'Hortatory mendorong tindakan nyata.' },
+      { id: 3, cat: 'genre', catLabel: 'Genre of Texts', front: 'Jenis teks apakah yang menjelaskan proses bagaimana dan mengapa (How & Why) fenomena alam/sosial terjadi?', back: 'Explanation Text.\nStruktur: General Statement → Sequenced Explanation → Closing (contoh: proses terjadinya Urban Heat Islands).', hint: 'Menjelaskan mekanisme fenomena ilmiah atau alam.' },
+      { id: 4, cat: 'genre', catLabel: 'Genre of Texts', front: 'Jenis teks apakah yang menyajikan dua sudut pandang berbeda (Proponents/Pro vs Critics/Kontra) sebelum menarik kesimpulan?', back: 'Discussion Text.\nStruktur: Issue → Arguments For (Pro) → Arguments Against (Con) → Conclusion/Recommendation.', hint: 'Banyak memakai kata hubung "On the other hand" atau "However".' },
+      { id: 5, cat: 'genre', catLabel: 'Genre of Texts', front: 'Apa struktur utama dari News Item Text dan apa fungsi kutipan narasumber di dalamnya?', back: 'Struktur: Main Event (Newsworthy Event) → Background Event (Elaboration) → Source.\nKutipan pejabat/ahli/saksi berfungsi sebagai Source (Sumber Berita).', hint: 'Teks berita aktual.' },
+      { id: 6, cat: 'genre', catLabel: 'Genre of Texts', front: 'Apa perbedaan fungsi Recount Text, Narrative Text, dan Descriptive Text?', back: '• Descriptive: Mendeskripsikan tempat/orang/benda spesifik (Simple Present).\n• Recount: Menceritakan pengalaman masa lalu secara kronologis (Simple Past).\n• Narrative: Cerita fiksi/dongeng dengan konflik (Complication) & pesan moral (Coda).', hint: 'Fokus pada ciri objek vs pengalaman nyata vs cerita dongeng.' },
+      { id: 7, cat: 'grammar', catLabel: 'Tenses & Time', front: 'Kapan kita menggunakan "be going to + V1" dibanding "will + V1" untuk prediksi?', back: 'Gunakan "be going to + V1" (contoh: is going to rain) ketika ada bukti fisik yang terlihat saat ini (contoh: "Look at the dark clouds!").', hint: 'Ada tanda alam atau bukti nyata di depan mata.' },
+      { id: 8, cat: 'grammar', catLabel: 'Tenses & Time', front: 'Bagaimana rumus penggunaan WHEN dan WHILE dalam Past Continuous Tense?', back: '• While + Past Continuous (was/were + V-ing), Simple Past (V2).\n• Past Continuous (was/were + V-ing) + When + Simple Past (V2).', hint: 'WHILE diikuti kejadian yang sedang berlangsung (-ing), WHEN diikuti kejadian pendek (V2).' },
+      { id: 9, cat: 'grammar', catLabel: 'Tenses & Time', front: 'Tense apa yang digunakan setelah penanda "By the time + Simple Past (V2)"?', back: 'Past Perfect Tense (S + had + V3).\nDigunakan untuk aksi yang sudah selesai lebih dulu sebelum aksi masa lalu lainnya terjadi.', hint: 'Contoh: By the time the rescue team arrived, the residents had evacuated.' },
+      { id: 10, cat: 'grammar', catLabel: 'Tenses & Time', front: 'Tense apa yang digunakan jika ada penanda "By + keterangan waktu masa depan" (misal: By the end of this year)?', back: 'Future Perfect Tense (S + will have + V3).\nMenyatakan kegiatan yang sudah akan tuntas pada batas waktu tertentu di masa depan.', hint: 'Contoh: will have completed.' },
+      { id: 11, cat: 'grammar', catLabel: 'Tenses & Time', front: 'Apa perbedaan penggunaan FOR dan SINCE pada Present Perfect Tense?', back: '• FOR diikuti durasi/rentang waktu (contoh: for two hours).\n• SINCE diikuti titik awal waktu spesifik (contoh: since 8 o\'clock this morning).', hint: 'Durasi vs Titik mulai.' },
+      { id: 12, cat: 'grammar', catLabel: 'Passive Voice', front: 'Bagaimana rumus Passive Voice untuk kalimat yang sedang berlangsung (Present Continuous / right now)?', back: 'S + is / am / are + BEING + V3\n(Contoh: A new plant is being built right now).', hint: 'Tambahkan kata "being" sebelum V3.' },
+      { id: 13, cat: 'grammar', catLabel: 'Passive Voice', front: 'Bagaimana rumus Passive Voice setelah kata bantu Modal (must, can, will, should)?', back: 'S + Modal + BE + V3\n(Contoh: All safety regulations must be followed).', hint: 'Tambahkan "be" setelah modal.' },
+      { id: 14, cat: 'grammar', catLabel: 'Conditionals', front: 'Bagaimana rumus dan fakta dari Conditional Sentence Type 2?', back: 'Rumus: If + Simple Past (V2 / were), S + would/could + V1.\nFakta: Tidak nyata saat ini (Present Unreal) — faktanya dalam Simple Present dan berlawanan sifat.', hint: 'Contoh: If I had enough money right now, I would upgrade my PC.' },
+      { id: 15, cat: 'grammar', catLabel: 'Conditionals', front: 'Bagaimana rumus dan cara mencari fakta dari Conditional Sentence Type 3?', back: 'Rumus: If + Past Perfect (had + V3), S + would/could + have + V3.\nFakta: Berbentuk Simple Past Tense (V2) dan berlawanan sifat (Positif jadi Negatif, sebaliknya).', hint: 'Menyatakan penyesalan di masa lampau.' },
+      { id: 16, cat: 'grammar', catLabel: 'Conditionals', front: 'Bagaimana bentuk Inversi (tanpa kata "If") untuk Conditional Type 1, Type 2, dan Type 3?', back: '• Type 1: Should + S + V1\n• Type 2: Were + S ...\n• Type 3: Had + S + V3 (Contoh: "Had I known..." = "If I had known...").', hint: 'Kata bantu ditarik ke paling depan kalimat.' },
+      { id: 17, cat: 'structure', catLabel: 'Relative Clauses', front: 'Bagaimana cara membedakan penggunaan WHO, WHOM, dan WHOSE dalam Relative Clause?', back: '• WHO + Verb (menggantikan Subjek orang)\n• WHOM + Subjek + Verb (menggantikan Objek orang)\n• WHOSE + Noun/Kata Benda (menunjukkan kepemilikan).', hint: 'Lihat kata tepat setelah titik-titik!' },
+      { id: 18, cat: 'structure', catLabel: 'Conjunctions', front: 'Apa perbedaan penggunaan Although/Even though dengan Despite/In spite of?', back: '• Although / Even though diikuti klausa lengkap (Subjek + Verb).\n• Despite / In spite of diikuti Noun Phrase (frasa benda tanpa kata kerja). Ingat: Jangan pakai "of" setelah "Despite"!', hint: 'Despite the heavy rain vs Although it rained heavily.' },
+      { id: 19, cat: 'structure', catLabel: 'Conjunctions', front: 'Apa perbedaan penggunaan Because/Since dengan Due to/Because of/Owing to?', back: '• Because / Since diikuti kalimat lengkap (Subjek + Verb).\n• Due to / Because of / Owing to diikuti Noun Phrase (frasa benda, contoh: due to the thick fog).', hint: 'Cek ada tidaknya kata kerja setelah konjungsi.' },
+      { id: 20, cat: 'structure', catLabel: 'Agreement', front: 'Bagaimana aturan kata kerja pada pasangan konjungsi "Neither ... nor ..." dan "Either ... or ..."?', back: 'Kata kerja (Verb) wajib mengikuti subjek yang posisinya PALING DEKAT (subjek kedua).\nContoh: Neither the manager nor the employees WERE aware.', hint: 'Lihat subjek setelah kata "nor" atau "or".' },
+      { id: 21, cat: 'structure', catLabel: 'Causative Verbs', front: 'Bagaimana rumus Causative Verbs Aktif (menyuruh orang) dan Pasif (meminta benda dikerjakan)?', back: '• Aktif (Objek Orang): S + have/make + Orang + V1 murni (had the technician fix) | S + get + Orang + to V1.\n• Pasif (Objek Benda): S + have/get + Benda + V3 (got her picture taken).', hint: 'Orang = V1 (atau to V1 untuk get); Benda = V3.' },
+      { id: 22, cat: 'structure', catLabel: 'Reported Speech', front: 'Bagaimana perubahan Tense pada Indirect Speech jika kata pengantar berbentuk lampau (Rian said, "...")?', back: 'Tense mundur 1 tahap:\n• V1 (Present) → V2 (Past)\n• V2 (Simple Past: submitted) → had + V3 (Past Perfect: had submitted)\n• Keterangan "yesterday" → "the day before".', hint: 'Mundur satu langkah ke masa lampau.' },
+      { id: 23, cat: 'structure', catLabel: 'Modals & Gerund', front: 'Kata kerja bentuk apa yang wajib mengikuti kata "postpone", "avoid", "consider", dan ungkapan "How about ..."?', back: 'Wajib diikuti oleh Gerund (V-ing).\nContoh: "postpone launching the product" dan "How about holding a daily evaluation?"', hint: 'Kata kerja berakhiran -ing.' },
+      { id: 24, cat: 'genre', catLabel: 'Reading & Vocab', front: 'Apa arti dari kosakata yang sering keluar di Reading ini: Breathtaking, Shoddy, dan Retain?', back: '• Breathtaking = Magnificent (Sangat menakjubkan/memukau)\n• Shoddy = Poor-quality (Kualitas buruk / asal-asalan)\n• Retain = Keep / Hold (Menyimpan / menahan panas).', hint: 'Kosakata kunci dari teks Raja Ampat, Carpenter, dan Urban Heat Island.' },
+      { id: 25, cat: 'genre', catLabel: 'Reading & Vocab', front: 'Apa arti dari kata "Proponents" dan "Deployed" dalam teks Reading TKA?', back: '• Proponents = People who support and advocate for something (Para pendukung / pihak pro).\n• Deployed = Put into use / Implemented (Diterapkan / diterjunkan ke lapangan).', hint: 'Kosakata kunci dari teks Remote Working dan BRIN AI System.' }
+    ];
+
+    /* ==========================================================
+       DATA 7 TEKS BACAAN & 50 SOAL KUIS KOMPREHENSIF
+       ========================================================== */
     const PASSAGES = {
       announcement: {
         title: "ANNOUNCEMENT (Soal 24–25)",
@@ -309,7 +967,6 @@
       }
     };
 
-    // Data 50 Soal Lengkap
     const ALL_QUESTIONS = [
       // I. GRAMMAR & STRUCTURE (1-20)
       {
@@ -820,18 +1477,222 @@
       }
     ];
 
-    // State Permainan
+    /* ==========================================================
+       STATE & LOGIKA NAVIGASI UTAMA + LOCALSTORAGE
+       ========================================================== */
+    let currentMainTab = 'study';
+    let masteredFlashcards = {}; // { id: true }
+    let highScore = 0;
+
+    function loadSavedProgress() {
+      try {
+        const savedFc = localStorage.getItem('tka_eng_fc_mastery');
+        if (savedFc) masteredFlashcards = JSON.parse(savedFc);
+        const savedHs = localStorage.getItem('tka_eng_highscore');
+        if (savedHs) highScore = parseInt(savedHs, 10) || 0;
+      } catch (e) {
+        console.warn('LocalStorage tidak tersedia:', e);
+      }
+      updateGlobalBadges();
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem('tka_eng_fc_mastery', JSON.stringify(masteredFlashcards));
+        localStorage.setItem('tka_eng_highscore', String(highScore));
+      } catch (e) {}
+      updateGlobalBadges();
+    }
+
+    function updateGlobalBadges() {
+      const masteredCount = Object.keys(masteredFlashcards).filter(k => masteredFlashcards[k]).length;
+      document.getElementById('nav-fc-badge').textContent = `${masteredCount}/25`;
+      document.getElementById('fc-mastery-text').textContent = `${masteredCount} / 25 Paham`;
+      document.getElementById('global-highscore').textContent = highScore;
+    }
+
+    function switchMainTab(tabName) {
+      currentMainTab = tabName;
+      ['study', 'flashcards', 'game'].forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`nav-${t}`);
+        if (t === tabName) {
+          sec.classList.remove('hidden');
+          btn.className = "nav-tab-btn px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-md";
+        } else {
+          sec.classList.add('hidden');
+          btn.className = "nav-tab-btn px-3.5 py-2 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
+        }
+      });
+      if (tabName === 'flashcards') {
+        renderCurrentFlashcard();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ==========================================================
+       LOGIKA TAB 1: STUDY HUB FILTER & SEARCH
+       ========================================================== */
+    function switchStudySubTab(sub) {
+      document.querySelectorAll('.study-sub-btn').forEach(btn => {
+        if (btn.dataset.sub === sub) {
+          btn.className = "study-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition";
+        } else {
+          btn.className = "study-sub-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition";
+        }
+      });
+
+      const secGenres = document.getElementById('study-sec-genres');
+      const secGrammar = document.getElementById('study-sec-grammar');
+      const secFunc = document.getElementById('study-sec-functional');
+
+      secGenres.classList.toggle('hidden', sub !== 'all' && sub !== 'genres');
+      secGrammar.classList.toggle('hidden', sub !== 'all' && sub !== 'grammar');
+      secFunc.classList.toggle('hidden', sub !== 'all' && sub !== 'functional');
+    }
+
+    function filterStudyContent(query) {
+      const q = query.trim().toLowerCase();
+      document.querySelectorAll('.searchable-card').forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.classList.toggle('hidden', q !== '' && !text.includes(q));
+      });
+    }
+
+    /* ==========================================================
+       LOGIKA TAB 2: INTERACTIVE 3D FLASHCARDS
+       ========================================================== */
+    let activeDeck = [...FLASHCARDS_DATA];
+    let fcIndex = 0;
+    let isCardFlipped = false;
+
+    function filterFlashcards(cat) {
+      document.querySelectorAll('.fc-cat-btn').forEach(btn => {
+        if (btn.dataset.fccat === cat) {
+          btn.className = "fc-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition";
+        } else {
+          btn.className = "fc-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:text-white transition";
+        }
+      });
+
+      if (cat === 'all') {
+        activeDeck = [...FLASHCARDS_DATA];
+      } else if (cat === 'unmastered') {
+        const unmastered = FLASHCARDS_DATA.filter(c => !masteredFlashcards[c.id]);
+        activeDeck = unmastered.length > 0 ? unmastered : [...FLASHCARDS_DATA];
+      } else {
+        activeDeck = FLASHCARDS_DATA.filter(c => c.cat === cat);
+      }
+
+      fcIndex = 0;
+      unflipCardImmediate();
+      renderCurrentFlashcard();
+    }
+
+    function shuffleFlashcards() {
+      activeDeck.sort(() => Math.random() - 0.5);
+      fcIndex = 0;
+      unflipCardImmediate();
+      renderCurrentFlashcard();
+    }
+
+    function unflipCardImmediate() {
+      isCardFlipped = false;
+      document.getElementById('fc-card-wrapper').classList.remove('flipped');
+      document.getElementById('fc-hint-box').classList.add('hidden');
+    }
+
+    function toggleFlipCard() {
+      isCardFlipped = !isCardFlipped;
+      document.getElementById('fc-card-wrapper').classList.toggle('flipped', isCardFlipped);
+    }
+
+    function showFcHint() {
+      const card = activeDeck[fcIndex];
+      if (!card) return;
+      document.getElementById('fc-hint-text').textContent = card.hint;
+      document.getElementById('fc-hint-box').classList.remove('hidden');
+    }
+
+    function renderCurrentFlashcard() {
+      if (activeDeck.length === 0) return;
+      const card = activeDeck[fcIndex];
+
+      document.getElementById('fc-counter-badge').textContent = `Kartu ${fcIndex + 1} dari ${activeDeck.length} (#${card.id})`;
+      document.getElementById('fc-front-cat').textContent = card.catLabel;
+      document.getElementById('fc-front-text').textContent = card.front;
+      document.getElementById('fc-back-text').innerHTML = card.back.replace(/\n/g, '<br>');
+
+      const statusPill = document.getElementById('fc-status-pill');
+      if (masteredFlashcards[card.id]) {
+        statusPill.textContent = "✅ Sudah Paham";
+        statusPill.className = "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold";
+      } else {
+        statusPill.textContent = "🔄 Belum Hafal";
+        statusPill.className = "px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-semibold";
+      }
+    }
+
+    function markFlashcard(isMastered) {
+      const card = activeDeck[fcIndex];
+      if (!card) return;
+      if (isMastered) {
+        masteredFlashcards[card.id] = true;
+      } else {
+        delete masteredFlashcards[card.id];
+      }
+      saveProgress();
+      renderCurrentFlashcard();
+      setTimeout(() => {
+        nextFlashcard();
+      }, 250);
+    }
+
+    function nextFlashcard() {
+      unflipCardImmediate();
+      setTimeout(() => {
+        fcIndex = (fcIndex + 1) % activeDeck.length;
+        renderCurrentFlashcard();
+      }, 150);
+    }
+
+    function prevFlashcard() {
+      unflipCardImmediate();
+      setTimeout(() => {
+        fcIndex = (fcIndex - 1 + activeDeck.length) % activeDeck.length;
+        renderCurrentFlashcard();
+      }, 150);
+    }
+
+    function resetFlashcardMastery() {
+      masteredFlashcards = {};
+      saveProgress();
+      renderCurrentFlashcard();
+    }
+
+    // Keyboard shortcut Spacebar for flipping card when on Flashcard tab
+    window.addEventListener('keydown', (e) => {
+      if (currentMainTab === 'flashcards' && e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        toggleFlipCard();
+      }
+    });
+
+    /* ==========================================================
+       LOGIKA TAB 3: MINI-GAME KUIS 50 SOAL
+       ========================================================== */
     let selectedCategory = 'all';
-    let selectedMode = 'zen'; // 'zen', 'survival', 'shuffle'
+    let selectedMode = 'zen';
     let activeQuestions = [];
     let currentIndex = 0;
-    let userAnswers = {}; // { questionId: selectedOptionIndex }
+    let userAnswers = {};
+    let hiddenOptionsMap = {}; // { questionId: [idx1, idx2] } for 50:50 lifeline
+    let lifelinesLeft = 3;
     let score = 0;
     let streak = 0;
     let maxStreak = 0;
     let lives = 5;
 
-    // Pilih Kategori di Menu
     function selectCategory(cat) {
       selectedCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
@@ -843,7 +1704,6 @@
       });
     }
 
-    // Pilih Mode di Menu
     function selectMode(mode) {
       selectedMode = mode;
       document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -855,7 +1715,6 @@
       });
     }
 
-    // Mulai Game
     function startGame(customQuestionList = null) {
       if (customQuestionList) {
         activeQuestions = [...customQuestionList];
@@ -868,6 +1727,8 @@
 
       currentIndex = 0;
       userAnswers = {};
+      hiddenOptionsMap = {};
+      lifelinesLeft = 3;
       score = 0;
       streak = 0;
       maxStreak = 0;
@@ -880,23 +1741,38 @@
 
       updateHUD();
       renderQuestion();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function updateHUD() {
       document.getElementById('score-display').textContent = score;
       document.getElementById('streak-display').textContent = streak;
+      document.getElementById('lifeline-count').textContent = lifelinesLeft;
+
       if (selectedMode === 'survival') {
-        document.getElementById('lives-display').textContent = '❤️'.repeat(lives) + '🖤'.repeat(5 - lives);
+        document.getElementById('lives-display').textContent = '❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, 5 - lives));
       } else {
         document.getElementById('lives-display').textContent = '♾️ Mode Zen';
       }
+    }
+
+    function useFiftyFifty() {
+      const qObj = activeQuestions[currentIndex];
+      if (!qObj || userAnswers.hasOwnProperty(qObj.id) || lifelinesLeft <= 0 || hiddenOptionsMap[qObj.id]) return;
+
+      const wrongIndices = [0, 1, 2, 3, 4].filter(idx => idx !== qObj.ans);
+      wrongIndices.sort(() => Math.random() - 0.5);
+      hiddenOptionsMap[qObj.id] = wrongIndices.slice(0, 2);
+      lifelinesLeft--;
+
+      updateHUD();
+      renderQuestion();
     }
 
     function renderQuestion() {
       const qObj = activeQuestions[currentIndex];
       const total = activeQuestions.length;
 
-      // Update Progress & Badges
       document.getElementById('question-badge').textContent = `Soal ${currentIndex + 1} / ${total} (#${qObj.id})`;
       document.getElementById('category-badge').textContent = qObj.catLabel;
       const pct = Math.round(((currentIndex + 1) / total) * 100);
@@ -912,24 +1788,30 @@
         passageContainer.classList.add('hidden');
       }
 
-      // Render Pertanyaan
       document.getElementById('question-text').innerHTML = qObj.q.replace(/\n/g, '<br>');
 
-      // Render Pilihan Jawaban
       const optionsContainer = document.getElementById('options-container');
       optionsContainer.innerHTML = '';
       const letters = ['A', 'B', 'C', 'D', 'E'];
       const alreadyAnswered = userAnswers.hasOwnProperty(qObj.id);
       const chosenIdx = userAnswers[qObj.id];
+      const hiddenIdxs = hiddenOptionsMap[qObj.id] || [];
+
+      // Disable 50:50 button if already answered or used on this question
+      document.getElementById('lifeline-5050-btn').disabled = alreadyAnswered || lifelinesLeft <= 0 || hiddenIdxs.length > 0;
 
       qObj.options.forEach((optText, idx) => {
+        const isEliminated = hiddenIdxs.includes(idx);
         const btn = document.createElement('button');
-        btn.disabled = alreadyAnswered;
+        btn.disabled = alreadyAnswered || isEliminated;
 
         let baseStyle = "option-btn w-full text-left p-3.5 md:p-4 rounded-2xl border-2 flex items-start gap-3.5 ";
         let badgeStyle = "w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-xs shrink-0 mt-0.5 ";
 
-        if (!alreadyAnswered) {
+        if (isEliminated && !alreadyAnswered) {
+          baseStyle += "border-slate-800/60 bg-slate-900/30 text-slate-600 opacity-40 line-through pointer-events-none";
+          badgeStyle += "bg-slate-800 text-slate-600";
+        } else if (!alreadyAnswered) {
           baseStyle += "border-slate-700/80 bg-slate-800/50 text-slate-100";
           badgeStyle += "bg-slate-700 text-slate-200";
         } else {
@@ -940,7 +1822,7 @@
             baseStyle += "border-rose-500 bg-rose-500/20 text-rose-200";
             badgeStyle += "bg-rose-500 text-white";
           } else {
-            baseStyle += "border-slate-800 bg-slate-900/40 text-slate-500 opacity-65";
+            baseStyle += "border-slate-800 bg-slate-900/40 text-slate-500 opacity-60";
             badgeStyle += "bg-slate-800 text-slate-500";
           }
         }
@@ -955,7 +1837,6 @@
         optionsContainer.appendChild(btn);
       });
 
-      // Tampilkan Feedback jika sudah dijawab
       const feedbackBox = document.getElementById('feedback-box');
       const nextBtn = document.getElementById('next-btn');
 
@@ -996,6 +1877,10 @@
         if (streak > maxStreak) maxStreak = streak;
         const bonus = Math.min(streak * 20, 100);
         score += 100 + bonus;
+        if (score > highScore) {
+          highScore = score;
+          saveProgress();
+        }
       } else {
         streak = 0;
         if (selectedMode === 'survival') {
@@ -1006,7 +1891,6 @@
       updateHUD();
       renderQuestion();
 
-      // Cek apakah Game Over pada mode Survival
       if (selectedMode === 'survival' && lives <= 0) {
         setTimeout(() => {
           showResults(true);
@@ -1062,7 +1946,7 @@
       if (isGameOver) {
         emojiEl.textContent = "💔";
         titleEl.textContent = "Nyawa Habis (Game Over)!";
-        subEl.textContent = "Jangan menyerah! Pelajari pembahasannya di bawah lalu coba lagi.";
+        subEl.textContent = "Jangan menyerah! Pelajari pembahasannya di bawah atau baca kembali Rangkuman Materi.";
       } else if (accuracy >= 85) {
         emojiEl.textContent = "👑";
         titleEl.textContent = "Luar Biasa! Master Bahasa Inggris TKA!";
@@ -1077,7 +1961,6 @@
         subEl.textContent = "Coba ulangi soal-soal yang masih salah agar makin paham polanya.";
       }
 
-      // Tombol Latih Soal yang Salah
       const retryWrongBtn = document.getElementById('retry-wrong-btn');
       if (wrongList.length > 0) {
         retryWrongBtn.classList.remove('hidden');
@@ -1087,12 +1970,11 @@
         retryWrongBtn.classList.add('hidden');
       }
 
-      // Render Daftar Review
       const reviewContainer = document.getElementById('review-list');
       reviewContainer.innerHTML = '';
       const letters = ['A', 'B', 'C', 'D', 'E'];
 
-      activeQuestions.forEach((q, idx) => {
+      activeQuestions.forEach((q) => {
         const userAns = userAnswers[q.id];
         const isCorrect = userAns === q.ans;
         const userAnsText = (userAns !== undefined) ? `${letters[userAns]}. ${q.options[userAns]}` : "Belum dijawab";
@@ -1129,11 +2011,28 @@
       document.getElementById('start-screen').classList.remove('hidden');
     }
 
-    function confirmQuit() {
-      if (confirm("Yakin ingin keluar ke menu utama? Progres saat ini akan direset.")) {
-        backToMenu();
-      }
+    function toggleCheatSheetModal(show) {
+      document.getElementById('cheatsheet-modal').classList.toggle('hidden', !show);
     }
+
+    function openQuitModal() {
+      document.getElementById('quit-modal').classList.remove('hidden');
+    }
+
+    function closeQuitModal() {
+      document.getElementById('quit-modal').classList.add('hidden');
+    }
+
+    function confirmQuitGame() {
+      closeQuitModal();
+      backToMenu();
+    }
+
+    // Inisialisasi saat halaman dimuat
+    window.onload = function () {
+      loadSavedProgress();
+      renderCurrentFlashcard();
+    };
   </script>
 </body>
 </html>
